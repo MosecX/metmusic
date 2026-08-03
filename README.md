@@ -6,7 +6,7 @@ A Tidal-inspired web player that streams lossless / Hi-Res FLAC music through a 
 
 ## Status
 
-This project is **very recent** and still under active development. It likely has bugs, rough edges and missing features. If you run into an error, find a broken flow or have a suggestion, please **[open an issue](https://github.com/MosecX/musify/issues)** — we'd be happy to know about it so we can fix it in upcoming updates.
+This project is **very recent** and still under active development. It likely has bugs, rough edges and missing features. If you run into an error, find a broken flow or have a suggestion, please **[open an issue](https://github.com/MosecX/metmusic/issues)** — we'd be happy to know about it so we can fix it in upcoming updates.
 
 ## Features
 
