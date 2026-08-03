@@ -1,0 +1,43 @@
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
+
+# Project: MetMusic — HiFi Web Player
+
+Tidal-inspired web player streaming lossless/Hi-Res FLAC through a Tidal-compatible API proxy. Next.js 16 App Router + React 19 + TypeScript + Tailwind v4.
+
+## Commands
+
+- `npm run dev` — start dev server (Turbopack), http://localhost:3000
+- `npm run build` — production build (uses Turbopack)
+- `npm run start` — serve production build on port 3000
+- `npm run lint` — ESLint (eslint-config-next)
+
+Always run `npm run lint` (and a build when the change is server/route-level) after making changes.
+
+## Architecture rules
+
+- **Metadata never hits the browser directly.** Server components (`app/**/page.tsx`) and API route handlers (`app/api/**`) are the only things allowed to call the API provider. Client components call only the app's own `/api/*` routes.
+- `NEXT_PUBLIC_API_BASE` is read from the environment (never hardcoded). `requireApiBase()` in `lib/tidal.ts` throws a clear error if unset. `.env` is gitignored; `.env.example` is the committed placeholder.
+- **Streaming flow:** `/api/stream/info` probes the provider → `direct` (`/api/stream` proxies a `/trackv2/` URL) or `dash` (`/api/stream/manifest` fetches `/track/`, base64 MPD → rewrites segment URLs to `/api/segment`). `/api/segment` is Range-aware. `/api/artwork` proxies Tidal CDN covers (adds CORS headers; required for Media Session artwork).
+- Image URLs are built in `lib/tidal.ts` (`coverUrl`, `pictureUrl`, `mixImageUrl`) → `resources.tidal.com/images/...`. Tidal CDN rejects the `500x500` size (403) — use `640x640` or larger.
+
+## API provider compatibility
+
+- **Primary:** [ez-hifi-api](https://github.com/itenai/ez-hifi-api) — 100% compatible (this player was built against it). Endpoints used: `/search/`, `/info/`, `/album/`, `/artist/`, `/playlist/`, `/mix/`, `/recommendations/`, `/lyrics/`, `/track/` (DASH), `/trackv2/` (direct).
+- **Also compatible:** [hifi-api](https://github.com/binimum/hifi-api) — near-100%; everything except `/trackv2/` (direct stream falls back to DASH).
+
+## Code conventions
+
+- No code comments unless explicitly requested.
+- TypeScript strict; use `@/` path alias (maps to project root).
+- Follow existing component/file conventions (see `components/`, `lib/`).
+- Player logic lives in `components/player.tsx` (dash.js engine, queue, PlayerBar, Media Session, keyboard shortcuts, visualizer).
+- Tailwind v4 (CSS-first config, `@import "tailwindcss"`).
+
+## Verification
+
+- Dev/build server may be launched detached; it listens on port 3000. To stop a stray server: kill the process listening on port 3000 (it may be `next dev` or `next start`).
+- Puppeteer-based verification scripts live in `C:\Users\{user}\AppData\Local\Temp\opencode\cdntest\` (Edge headless).

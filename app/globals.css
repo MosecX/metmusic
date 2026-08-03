@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+:root {
+  --background: #07070b;
+  --foreground: #f4f4f5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Glassmorphism surfaces ---- */
+.glass {
+  background: rgba(255, 255, 255, 0.055);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.085);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.glass-soft {
+  background: rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-hover {
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Hide scrollbars for a cleaner music-app feel */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Range sliders (seek + volume) */
+.progress-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background:
+    linear-gradient(90deg, #22d3ee, #a78bfa, #e879f9) 0 / var(--fill, 0%) 100% no-repeat,
+    rgba(255, 255, 255, 0.14);
+  outline: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.progress-slider:hover {
+  transform: scaleY(1.25);
+}
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.progress-slider:hover::-webkit-slider-thumb,
+.progress-slider:active::-webkit-slider-thumb {
+  opacity: 1;
+  transform: scale(1.1);
+}
+.progress-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.progress-slider:hover::-moz-range-thumb,
+.progress-slider:active::-moz-range-thumb {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+@media (pointer: coarse) {
+  .progress-slider::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    opacity: 1;
+  }
+  .progress-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease both;
+}
+
+/* ---- Fullscreen visualizer ---- */
+.vz-layer {
+  position: absolute;
+  inset: -12%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(70px) saturate(150%) brightness(0.8);
+  opacity: 0.5;
+  will-change: transform;
+}
+.vz-1 {
+  animation: vz-drift-a 26s ease-in-out infinite alternate;
+}
+.vz-2 {
+  animation: vz-drift-b 34s ease-in-out infinite alternate;
+  opacity: 0.4;
+}
+.vz-3 {
+  animation: vz-drift-c 22s ease-in-out infinite alternate;
+  opacity: 0.45;
+}
+.vz-4 {
+  animation: vz-drift-d 40s ease-in-out infinite alternate;
+  opacity: 0.35;
+}
+
+@keyframes vz-drift-a {
+  from {
+    transform: scale(1.15) translate3d(-4%, -3%, 0) rotate(-2deg);
+  }
+  to {
+    transform: scale(1.35) translate3d(4%, 3%, 0) rotate(2deg);
+  }
+}
+@keyframes vz-drift-b {
+  from {
+    transform: scale(1.3) translate3d(3%, 4%, 0) rotate(3deg);
+  }
+  to {
+    transform: scale(1.1) translate3d(-3%, -4%, 0) rotate(-3deg);
+  }
+}
+@keyframes vz-drift-c {
+  from {
+    transform: scale(1.2) translate3d(-2%, 4%, 0) rotate(1deg);
+  }
+  to {
+    transform: scale(1.4) translate3d(3%, -4%, 0) rotate(-1deg);
+  }
+}
+@keyframes vz-drift-d {
+  from {
+    transform: scale(1.4) translate3d(2%, -2%, 0);
+  }
+  to {
+    transform: scale(1.2) translate3d(-2%, 2%, 0);
+  }
+}
