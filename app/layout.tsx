@@ -4,6 +4,7 @@ import Link from "next/link";
 import Sidebar from "@/components/sidebar";
 import { PlayerBar, PlayerProvider } from "@/components/player";
 import { PwaRegister } from "@/components/pwa-register";
+import { NavButtons } from "@/components/nav-buttons";
 import { IconHome, IconLibrary, IconSearch, IconSparkle } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -57,13 +58,18 @@ export default function RootLayout({
 
         <PlayerProvider>
           {/* Mobile top bar */}
-          <header className="glass-strong sticky top-0 z-30 flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:hidden">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
-                <IconSparkle className="h-5 w-5" />
-              </span>
-              <span className="text-base font-bold tracking-tight text-white">MetMusic</span>
-            </Link>
+          <header className="glass-strong sticky top-0 z-30 flex items-center justify-between gap-2 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:hidden">
+            <div className="flex min-w-0 items-center gap-1">
+              <NavButtons />
+              <Link href="/" className="flex shrink-0 items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
+                  <IconSparkle className="h-5 w-5" />
+                </span>
+                <span className="hidden text-base font-bold tracking-tight text-white sm:inline">
+                  MetMusic
+                </span>
+              </Link>
+            </div>
             <nav className="flex items-center gap-1">
               {MOBILE_LINKS.map((link) => (
                 <Link

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getAlbum, checkApiHealth, coverUrl } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
+import { ShareButton } from "@/components/share-button";
 import { TrackList } from "@/components/track-row";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
@@ -80,6 +81,7 @@ export default async function AlbumPage({
           </p>
           <div className="mt-6 flex items-center gap-4">
             <PlayAllButton tracks={tracks} />
+            <ShareButton title={`${album.title} by ${artists.map((a) => a.name).join(", ")}`} />
           </div>
         </div>
       </div>

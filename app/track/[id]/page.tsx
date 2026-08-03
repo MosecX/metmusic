@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getLyrics, getRecommendations, getTrack, checkApiHealth, coverUrl, trackArtists } from "@/lib/tidal";
 import { formatDuration, formatDate } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
+import { ShareButton } from "@/components/share-button";
 import { TrackList } from "@/components/track-row";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
@@ -90,8 +91,9 @@ export default async function TrackPage({
             <span>{formatDuration(track.duration)}</span>
             {track.isrc ? <span>ISRC {track.isrc}</span> : null}
           </div>
-          <div className="mt-6">
+          <div className="mt-6 flex items-center gap-4">
             <PlayAllButton tracks={[track]} />
+            <ShareButton title={track.title} />
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getMix, mixImageUrl, checkApiHealth } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
+import { ShareButton } from "@/components/share-button";
 import { TrackList } from "@/components/track-row";
 import { IconSparkle } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
@@ -74,8 +75,9 @@ export default async function MixDetailPage({
               ? ` · ${formatDuration(items.reduce((sum, t) => sum + (t.duration || 0), 0))}`
               : ""}
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex items-center gap-4">
             <PlayAllButton tracks={items} />
+            <ShareButton title={mix.title} />
           </div>
         </div>
       </div>
