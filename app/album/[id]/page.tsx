@@ -7,7 +7,7 @@ import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconMusic } from "@/components/icons";
 
-export const metadata = { title: "Album — musify" };
+export const metadata = { title: "Album — MetMusic" };
 
 export default async function AlbumPage({
   params,

@@ -6,7 +6,7 @@ import { TrackList } from "@/components/track-row";
 import { CardGrid, AlbumCard } from "@/components/cards";
 import { IconMusic } from "@/components/icons";
 
-export const metadata = { title: "Artist — musify" };
+export const metadata = { title: "Artist — MetMusic" };
 
 export default async function ArtistPage({
   params,

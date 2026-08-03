@@ -6,7 +6,7 @@ import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconSparkle } from "@/components/icons";
 
-export const metadata = { title: "Mix — musify" };
+export const metadata = { title: "Mix — MetMusic" };
 
 export default async function MixDetailPage({
   params,
