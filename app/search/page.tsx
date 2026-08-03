@@ -3,6 +3,7 @@ import { searchArtists, searchAlbums, searchTracks } from "@/lib/tidal";
 import { SearchBox } from "@/components/search-box";
 import { TrackList } from "@/components/track-row";
 import { CardGrid, AlbumCard, ArtistCard } from "@/components/cards";
+import ApiStatusBanner from "@/components/api-status";
 
 export const metadata = { title: "Search — MetMusic" };
 
@@ -16,6 +17,7 @@ export default async function SearchPage({
 
   return (
     <div>
+      <ApiStatusBanner />
       <h1 className="mb-5 text-2xl font-bold text-white">Search</h1>
       <SearchBox key={query} initial={query} autoFocus className="mb-8 max-w-xl" />
 

@@ -40,13 +40,16 @@ function attachDashListeners(
   dp: dashjs.MediaPlayerClass,
   events: typeof dashjs.MediaPlayer.events,
   started: () => void,
-  failed: (event: unknown) => void
+  failed: (event: unknown) => void,
+  ended: () => void
 ): () => void {
   dp.on(events.PLAYBACK_STARTED, started);
   dp.on(events.ERROR, failed);
+  dp.on(events.PLAYBACK_ENDED, ended);
   return () => {
     dp.off(events.PLAYBACK_STARTED, started);
     dp.off(events.ERROR, failed);
+    dp.off(events.PLAYBACK_ENDED, ended);
   };
 }
 
@@ -103,6 +106,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const indexRef = useRef(-1);
   const queueRef = useRef<Track[]>([]);
+  const advancingRef = useRef(false);
+  const repeatRef = useRef(repeat);
+  const shuffleRef = useRef(shuffle);
+  const handleEndedRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     queueRef.current = queue;
@@ -148,6 +155,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setError(null);
       setLoading(true);
       suppressErrorRef.current = true;
+      advancingRef.current = true;
 
       const audio = audioRef.current;
       if (!audio) return;
@@ -168,6 +176,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           audio.load();
           await audio.play();
           setIsPlaying(true);
+          advancingRef.current = false;
           suppressErrorRef.current = false;
         } else if (info.mode === "dash" && info.manifest) {
           const dashjsMod = await import("dashjs");
@@ -177,6 +186,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           const started = () => {
             if (indexRef.current === i) {
               setIsPlaying(true);
+              advancingRef.current = false;
               suppressErrorRef.current = false;
             }
           };
@@ -185,17 +195,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
             if (indexRef.current === i) {
               setError(detail.error?.message ?? "DASH playback error");
               setIsPlaying(false);
+              advancingRef.current = false;
               suppressErrorRef.current = false;
             }
           };
+          const ended = () => {
+            if (indexRef.current === i) handleEndedRef.current();
+          };
           dashListenersRef.current = [
-            attachDashListeners(dp, dashjsMod.MediaPlayer.events, started, failed),
+            attachDashListeners(dp, dashjsMod.MediaPlayer.events, started, failed, ended),
           ];
         } else {
           throw new Error("No playback source available");
         }
       } catch (e) {
         suppressErrorRef.current = false;
+        advancingRef.current = false;
         if (indexRef.current === i) {
           setError(e instanceof Error ? e.message : "Playback failed");
           setIsPlaying(false);
@@ -237,25 +252,31 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [currentTrack]);
 
-  const next = useCallback(() => {
+  const advanceToNext = useCallback(() => {
     const list = queueRef.current;
     if (!list.length) return;
-    if (shuffle) {
+    if (shuffleRef.current) {
       const i = Math.floor(Math.random() * list.length);
       void loadAndPlay(list[i], list, i);
       return;
     }
     const i = indexRef.current;
     if (i >= list.length - 1) {
-      if (repeat === "all") void loadAndPlay(list[0], list, 0);
-      else {
-        setIsPlaying(false);
-        if (audioRef.current) audioRef.current.pause();
+      if (repeatRef.current === "all") {
+        void loadAndPlay(list[0], list, 0);
+        return;
       }
+      advancingRef.current = false;
+      setIsPlaying(false);
+      if (audioRef.current) audioRef.current.pause();
       return;
     }
     void loadAndPlay(list[i + 1], list, i + 1);
-  }, [shuffle, repeat, loadAndPlay]);
+  }, [loadAndPlay]);
+
+  const next = useCallback(() => {
+    advanceToNext();
+  }, [advanceToNext]);
 
   const prev = useCallback(() => {
     const list = queueRef.current;
@@ -265,7 +286,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.currentTime = 0;
       return;
     }
-    if (shuffle) {
+    if (shuffleRef.current) {
       const i = Math.floor(Math.random() * list.length);
       void loadAndPlay(list[i], list, i);
       return;
@@ -273,7 +294,35 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const i = indexRef.current;
     const target = i > 0 ? i - 1 : list.length - 1;
     void loadAndPlay(list[target], list, target);
-  }, [shuffle, loadAndPlay]);
+  }, [loadAndPlay]);
+
+  const handleEnded = useCallback(() => {
+    if (advancingRef.current) return;
+    if (repeatRef.current === "one") {
+      advancingRef.current = true;
+      const audio = audioRef.current;
+      const dp = dashPlayerRef.current;
+      if (dp) {
+        try {
+          dp.seek(0);
+          dp.play();
+        } catch {
+          /* ignore */
+        }
+        window.setTimeout(() => {
+          advancingRef.current = false;
+        }, 300);
+      } else if (audio) {
+        audio.currentTime = 0;
+        void audio.play().finally(() => {
+          advancingRef.current = false;
+        });
+      }
+      return;
+    }
+    advancingRef.current = true;
+    advanceToNext();
+  }, [advanceToNext]);
 
   const seek = useCallback((time: number) => {
     const audio = audioRef.current;
@@ -306,6 +355,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     prevRef.current = prev;
     seekRef.current = seek;
     setVolumeRef.current = setVolume;
+    repeatRef.current = repeat;
+    shuffleRef.current = shuffle;
+    handleEndedRef.current = handleEnded;
   });
 
   useEffect(() => {
@@ -488,18 +540,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
         onDurationChange={(e) => setDuration(e.currentTarget.duration || 0)}
         onEnded={() => {
-          if (repeat === "one") {
-            const audio = audioRef.current;
-            if (audio) {
-              audio.currentTime = 0;
-              void audio.play();
-            }
-          } else {
-            next();
-          }
+          handleEndedRef.current();
         }}
         onError={() => {
           if (suppressErrorRef.current) return;
+          advancingRef.current = false;
           if (indexRef.current >= 0) {
             setError("Unable to play this track");
             setIsPlaying(false);
@@ -555,7 +600,7 @@ export function PlayerBar() {
   return (
     <div className="glass-strong fixed inset-x-0 bottom-0 z-40 rounded-t-2xl">
       {/* Mobile layout */}
-      <div className="flex flex-col gap-1.5 px-3 pb-2 pt-2 md:hidden">
+      <div className="flex flex-col gap-1.5 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 md:hidden">
         <div className="flex items-center gap-3">
           {cover ? (
             <button
@@ -737,21 +782,21 @@ export function PlayerBar() {
               )}
             </button>
           </div>
-          <div className="flex w-full max-w-xl items-center gap-2 text-[11px] tabular-nums text-white/50">
-            <span className="w-10 text-right">{formatDuration(currentTime)}</span>
-            <input
-              type="range"
-              min={0}
-              max={duration || 0}
-              step={0.5}
-              value={Math.min(currentTime, duration || 0)}
-              onChange={(e) => seek(Number(e.target.value))}
-              className="progress-slider flex-1"
-              style={fillStyle(seekPct)}
-              aria-label="Seek"
-            />
-            <span className="w-10">{formatDuration(duration)}</span>
-          </div>
+<div className="flex w-full max-w-xl items-center gap-2 text-[11px] tabular-nums text-white/50">
+          <span className="w-10 text-right">{formatDuration(currentTime)}</span>
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={0.5}
+            value={Math.min(currentTime, duration || 0)}
+            onChange={(e) => seek(Number(e.target.value))}
+            className="slider-fine flex-1"
+            style={fillStyle(seekPct)}
+            aria-label="Seek"
+          />
+          <span className="w-10">{formatDuration(duration)}</span>
+        </div>
         </div>
 
         <div className="flex items-center justify-end gap-2">
@@ -768,7 +813,7 @@ export function PlayerBar() {
             step={0.01}
             value={volume}
             onChange={(e) => setVolume(Number(e.target.value))}
-            className="progress-slider w-24"
+            className="slider-fine w-24"
             style={fillStyle(volPct)}
             aria-label="Volume"
           />
@@ -842,62 +887,61 @@ function Visualizer({
       ref={dialogRef}
       onClose={onClose}
       aria-label="Visualizer"
-      className="fixed inset-0 z-50 m-0 h-full max-h-full w-full max-w-full overflow-hidden border-0 bg-[#050508] p-0"
+      className="fixed inset-0 z-50 m-0 h-dvh max-h-full w-full max-w-full overflow-hidden border-0 bg-[#050508] p-0"
     >
       <div className="flex h-full w-full flex-col" onClick={onClose}>
         <div className="vz-layer vz-1" style={{ backgroundImage: `url(${cover})` }} />
-      <div className="vz-layer vz-2" style={{ backgroundImage: `url(${cover})` }} />
-      <div className="vz-layer vz-3" style={{ backgroundImage: `url(${cover})` }} />
-      <div className="vz-layer vz-4" style={{ backgroundImage: `url(${cover})` }} />
-      <div className="absolute inset-0 bg-black/60" />
+        <div className="vz-layer vz-3" style={{ backgroundImage: `url(${cover})` }} />
+        <div className="absolute inset-0 bg-black/65" />
 
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close visualizer"
-        className="glass absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white"
-      >
-        <IconClose className="h-5 w-5" />
-      </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close visualizer"
+          className="glass absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white"
+        >
+          <IconClose className="h-5 w-5" />
+        </button>
 
-      <div
-        className="relative z-10 flex h-full flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between gap-4 pl-5 pr-16 pt-5 md:pl-8 md:pr-24">
-          <div className="flex min-w-0 items-center gap-3">
-            <Image
-              src={cover}
-              alt={title}
-              width={48}
-              height={48}
-              sizes="48px"
-              className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-white/15"
-            />
-            <div className="min-w-0">
-              <h2 className="truncate text-base font-bold text-white md:text-lg">
-                {title}
-              </h2>
-              <p className="truncate text-xs text-white/60">{artist}</p>
+        <div
+          className="relative z-10 flex h-full flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between gap-4 px-5 pt-5 md:px-8 md:pt-6">
+            <div className="flex min-w-0 items-center gap-3">
+              <Image
+                src={cover}
+                alt={title}
+                width={40}
+                height={40}
+                sizes="40px"
+                className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-white/15"
+              />
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-semibold text-white md:text-base">
+                  {title}
+                </h2>
+                <p className="truncate text-xs text-white/60">{artist}</p>
+              </div>
             </div>
+            {quality && (
+              <QualityBadgeView quality={quality} size="lg" className="hidden sm:inline-flex" />
+            )}
           </div>
-          {quality && (
-            <QualityBadgeView quality={quality} size="lg" className="hidden sm:inline-flex" />
-          )}
-        </div>
 
-        <LyricsSection
-          title={title}
-          artist={artist}
-          album={currentTrack?.album?.title}
-          durationSec={currentTrack?.duration}
-          getAudio={getAudio}
-          onSeek={seek}
-        />
+          <LyricsSection
+            title={title}
+            artist={artist}
+            album={currentTrack?.album?.title}
+            durationSec={currentTrack?.duration}
+            getAudio={getAudio}
+            onSeek={seek}
+          />
 
-        <div className="flex flex-col items-center gap-3 px-6 pb-6">
-          <div className="flex w-full max-w-2xl items-center gap-2 text-[11px] tabular-nums text-white/50">
-            <span className="w-10 text-right">{formatDuration(currentTime)}</span>
+          <div className="flex flex-col items-center px-5 pb-6 md:px-8">
+            <div className="flex w-full max-w-2xl flex-col items-center gap-3 rounded-2xl bg-black/35 px-5 py-4 backdrop-blur-md ring-1 ring-white/10">
+              <div className="flex w-full items-center gap-2 text-[11px] tabular-nums text-white/60">
+                <span className="w-10 text-right">{formatDuration(currentTime)}</span>
             <input
               type="range"
               min={0}
@@ -905,7 +949,7 @@ function Visualizer({
               step={0.5}
               value={Math.min(currentTime, duration || 0)}
               onChange={(e) => seek(Number(e.target.value))}
-              className="progress-slider flex-1"
+              className="slider-fine flex-1"
               style={fillStyle(seekPct)}
               aria-label="Seek"
             />
@@ -957,15 +1001,16 @@ function Visualizer({
                 step={0.01}
                 value={volume}
                 onChange={(e) => setVolume(Number(e.target.value))}
-                className="progress-slider w-24"
+                className="slider-fine w-24"
                 style={fillStyle(volPct)}
                 aria-label="Volume"
               />
             </div>
           </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
     </dialog>
   );
 }

@@ -135,6 +135,16 @@ export interface ApiError {
   detail?: string;
 }
 
+export class ApiFetchError extends Error {
+  status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "ApiFetchError";
+    this.status = status;
+  }
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${requireApiBase()}${path}`, {
     ...init,
@@ -153,10 +163,44 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* ignore */
     }
-    throw new Error(detail);
+    throw new ApiFetchError(detail, res.status);
   }
 
   return (await res.json()) as T;
+}
+
+export interface ApiHealth {
+  online: boolean;
+  error: string | null;
+  version?: string;
+}
+
+export async function checkApiHealth(): Promise<ApiHealth> {
+  try {
+    const res = await fetch(requireApiBase(), {
+      cache: "no-store",
+      signal: AbortSignal.timeout(6000),
+      headers: { Accept: "application/json" },
+    });
+
+    if (!res.ok) {
+      return { online: false, error: `HTTP ${res.status}` };
+    }
+
+    const body = (await res.json()) as {
+      version?: string;
+      Message?: string;
+      message?: string;
+    };
+
+    return {
+      online: true,
+      error: null,
+      version: typeof body?.version === "string" ? body.version : undefined,
+    };
+  } catch {
+    return { online: false, error: null };
+  }
 }
 
 export async function searchTracks(

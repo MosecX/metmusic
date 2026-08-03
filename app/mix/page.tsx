@@ -12,6 +12,7 @@ import { CardGrid, MixCard } from "@/components/cards";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconSparkle } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 const MY_MIX_ID = "f6f96110-52ef-4713-9bf1-6438df5c042f";
 const SEED_TRACKS = [426214797, 340303122, 1550546, 422281860, 409386866];
@@ -51,6 +52,8 @@ export default async function MixPage() {
 
   return (
     <div>
+      <ApiStatusBanner />
+
       {/* Featured mix */}
       {playlist && (
         <section className="glass relative mb-10 overflow-hidden rounded-3xl">

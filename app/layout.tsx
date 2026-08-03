@@ -1,13 +1,32 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Link from "next/link";
 import Sidebar from "@/components/sidebar";
 import { PlayerBar, PlayerProvider } from "@/components/player";
+import { PwaRegister } from "@/components/pwa-register";
 import { IconHome, IconLibrary, IconSearch, IconSparkle } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "MetMusic — HiFi Streaming",
   description: "A Tidal-inspired web player powered by the ez-hifi-api proxy.",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "MetMusic",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: { telephone: false },
+  applicationName: "MetMusic",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#07070b",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 const MOBILE_LINKS = [
@@ -38,7 +57,7 @@ export default function RootLayout({
 
         <PlayerProvider>
           {/* Mobile top bar */}
-          <header className="glass-strong sticky top-0 z-30 flex items-center justify-between px-4 py-3 lg:hidden">
+          <header className="glass-strong sticky top-0 z-30 flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:hidden">
             <Link href="/" className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
                 <IconSparkle className="h-5 w-5" />
@@ -62,12 +81,13 @@ export default function RootLayout({
           <div className="relative z-10">
             <Sidebar />
             <div className="lg:pl-60">
-              <main className="mx-auto max-w-7xl px-4 pb-32 pt-6 md:px-8 lg:pt-10">
+              <main className="mx-auto max-w-7xl px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-6 md:px-8 lg:pt-10">
                 {children}
               </main>
             </div>
           </div>
           <PlayerBar />
+          <PwaRegister />
         </PlayerProvider>
       </body>
     </html>

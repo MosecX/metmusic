@@ -16,6 +16,7 @@ import { CardGrid, AlbumCard } from "@/components/cards";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconPlay } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 const SEED_TRACKS = [
   426214797, 426651227, 436445459, 426178440, 424801149, 422281860,
@@ -84,6 +85,8 @@ export default async function HomePage() {
 
   return (
     <div>
+      <ApiStatusBanner />
+
       {/* Hero */}
       {heroTrack && (
         <section className="glass relative mb-10 overflow-hidden rounded-3xl">

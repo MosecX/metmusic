@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getArtist, getArtistDiscography } from "@/lib/tidal";
+import { getArtist, getArtistDiscography, checkApiHealth } from "@/lib/tidal";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { CardGrid, AlbumCard } from "@/components/cards";
 import { IconMusic } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 export const metadata = { title: "Artist — MetMusic" };
 
@@ -14,6 +15,11 @@ export default async function ArtistPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const health = await checkApiHealth();
+  if (!health.online) {
+    return <ApiStatusBanner health={health} />;
+  }
 
   let info;
   try {

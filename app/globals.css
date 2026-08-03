@@ -16,6 +16,10 @@ body {
   height: 100%;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -29,6 +33,10 @@ body {
     Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overscroll-behavior-y: none;
+  text-rendering: optimizeLegibility;
 }
 
 /* ---- Glassmorphism surfaces ---- */
@@ -162,6 +170,68 @@ body {
     width: 16px;
     height: 16px;
     opacity: 1;
+  }
+}
+
+/* ---- Minimal but clearly-visible slider (desktop player/visualizer) ---- */
+.slider-fine {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background:
+    linear-gradient(90deg, #22d3ee, #a78bfa, #e879f9) 0 / var(--fill, 0%) 100% no-repeat,
+    rgba(255, 255, 255, 0.16);
+  outline: none;
+  cursor: pointer;
+  transition:
+    height 0.15s ease,
+    box-shadow 0.2s ease;
+}
+.slider-fine:hover {
+  height: 6px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+}
+.slider-fine::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+.slider-fine:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+  box-shadow:
+    0 0 0 5px rgba(255, 255, 255, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+}
+.slider-fine::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s ease;
+}
+.slider-fine:hover::-moz-range-thumb {
+  transform: scale(1.2);
+}
+@media (pointer: coarse) {
+  .slider-fine::-webkit-slider-thumb,
+  .slider-fine::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
   }
 }
 

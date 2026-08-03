@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getMix, mixImageUrl } from "@/lib/tidal";
+import { getMix, mixImageUrl, checkApiHealth } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconSparkle } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 export const metadata = { title: "Mix — MetMusic" };
 
@@ -14,6 +15,11 @@ export default async function MixDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const health = await checkApiHealth();
+  if (!health.online) {
+    return <ApiStatusBanner health={health} />;
+  }
 
   let data;
   try {

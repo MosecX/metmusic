@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { searchPlaylists, playlistCoverUrl } from "@/lib/tidal";
 import { IconMusic } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 export const metadata = { title: "Library — MetMusic" };
 
@@ -21,6 +22,7 @@ export default async function LibraryPage() {
 
   return (
     <div>
+      <ApiStatusBanner />
       <h1 className="mb-8 text-2xl font-bold text-white">Browse playlists</h1>
 
       {CATEGORIES.map((cat, idx) => {

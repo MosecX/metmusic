@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getAlbum, coverUrl } from "@/lib/tidal";
+import { getAlbum, checkApiHealth, coverUrl } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconMusic } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 export const metadata = { title: "Album — MetMusic" };
 
@@ -15,6 +16,11 @@ export default async function AlbumPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const health = await checkApiHealth();
+  if (!health.online) {
+    return <ApiStatusBanner health={health} />;
+  }
 
   let album;
   try {

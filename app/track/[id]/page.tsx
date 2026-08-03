@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getLyrics, getRecommendations, getTrack, coverUrl, trackArtists } from "@/lib/tidal";
+import { getLyrics, getRecommendations, getTrack, checkApiHealth, coverUrl, trackArtists } from "@/lib/tidal";
 import { formatDuration, formatDate } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
 import { IconMusic } from "@/components/icons";
+import ApiStatusBanner from "@/components/api-status";
 
 export const metadata = { title: "Track — MetMusic" };
 
@@ -15,6 +16,11 @@ export default async function TrackPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const health = await checkApiHealth();
+  if (!health.online) {
+    return <ApiStatusBanner health={health} />;
+  }
 
   let track;
   try {
