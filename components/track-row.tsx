@@ -6,6 +6,7 @@ import { usePlayer } from "@/components/player";
 import { coverUrl, trackArtists, type Track } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { QualityBadge } from "@/components/quality-badge";
+import { ShareButton } from "@/components/share-button";
 import { IconPause, IconPlay, IconSparkle } from "@/components/icons";
 
 function TrackRow({
@@ -143,6 +144,12 @@ function TrackRow({
             <IconSparkle className="h-5 w-5" />
           </Link>
         )}
+        <ShareButton
+          title={track.title}
+          url={`/track/${track.id}`}
+          size="sm"
+          iconOnly
+        />
         {track.explicit && (
           <span
             className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/10 text-[8px] font-bold text-white/60"

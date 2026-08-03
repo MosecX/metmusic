@@ -4,6 +4,7 @@ import type { AlbumLite, ArtistLite, TrackMix } from "@/lib/tidal";
 import { coverUrl, pictureUrl, mixImageUrl } from "@/lib/tidal";
 import { qualityClass, qualityShort } from "@/lib/utils";
 import { IconMusic, IconSparkle } from "@/components/icons";
+import { ShareButton } from "@/components/share-button";
 
 const CARD_SIZES =
   "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw";
@@ -32,15 +33,22 @@ export function AlbumCard({ album, size = 220 }: { album: AlbumLite; size?: numb
           </div>
         )}
         {album.audioQuality && qualityShort(album.audioQuality) && (
-          <span
-            className={`absolute right-2 top-2 z-10 rounded-full border px-2 py-0.5 text-[9px] font-bold tracking-wide backdrop-blur-md ${qualityClass(
-              album.audioQuality
-            )}`}
-            title={album.audioQuality.replace(/_/g, " ")}
-          >
-            {qualityShort(album.audioQuality)}
-          </span>
+<span
+          className={`absolute right-2 top-2 z-10 rounded-full border px-2 py-0.5 text-[9px] font-bold tracking-wide backdrop-blur-md ${qualityClass(
+            album.audioQuality
+          )}`}
+          title={album.audioQuality.replace(/_/g, " ")}
+        >
+          {qualityShort(album.audioQuality)}
+        </span>
         )}
+        <ShareButton
+          title={album.title}
+          url={`/album/${album.id}`}
+          size="sm"
+          iconOnly
+          className="absolute bottom-2 right-2"
+        />
       </div>
       <h3 className="truncate text-sm font-semibold text-white">{album.title}</h3>
       <p className="truncate text-xs text-white/50">{artist}</p>
@@ -73,6 +81,13 @@ export function MixCard({ mix, size = 220 }: { mix: TrackMix; size?: number }) {
         <span className="absolute right-2 top-2 z-10 rounded-full border border-white/10 bg-black/40 px-2 py-0.5 text-[9px] font-bold tracking-wide text-white/80 backdrop-blur-md">
           Mix
         </span>
+        <ShareButton
+          title={mix.title}
+          url={`/mix/${mix.id}`}
+          size="sm"
+          iconOnly
+          className="absolute bottom-2 right-2"
+        />
       </div>
       <h3 className="truncate text-sm font-semibold text-white">{mix.title}</h3>
       {mix.subTitle && (
