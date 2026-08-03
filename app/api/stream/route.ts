@@ -1,7 +1,27 @@
 import type { NextRequest } from "next/server";
 import { requireApiBase } from "@/lib/tidal";
 
-async function resolveStreamUrl(id: string): Promise<string | null> {
+async function resolveTrackUrl(id: string, quality: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=false`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    const body = (await res.json()) as { data?: { manifest?: string } };
+    if (!body.data?.manifest) return null;
+    const decoded = Buffer.from(body.data.manifest, "base64").toString("utf-8");
+    const parsed = JSON.parse(decoded) as { urls?: string[] };
+    return parsed.urls?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveStreamUrl(id: string, src: string, quality: string): Promise<string | null> {
+  if (src === "track") {
+    return resolveTrackUrl(id, quality);
+  }
   try {
     const res = await fetch(`${requireApiBase()}/trackv2/?id=${id}`, { cache: "no-store" });
     if (!res.ok) return null;
@@ -27,8 +47,10 @@ export async function GET(req: NextRequest) {
   if (!id) {
     return new Response("missing id", { status: 400 });
   }
+  const src = req.nextUrl.searchParams.get("src") ?? "direct";
+  const quality = req.nextUrl.searchParams.get("quality") ?? "HI_RES_LOSSLESS";
 
-  const streamUrl = await resolveStreamUrl(id);
+  const streamUrl = await resolveStreamUrl(id, src, quality);
   if (!streamUrl) {
     return new Response("stream unavailable", { status: 502 });
   }

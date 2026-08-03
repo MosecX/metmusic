@@ -141,6 +141,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [destroyDash]);
 
   const suppressErrorRef = useRef(false);
+  const dashRetriedRef = useRef(false);
 
   const loadAndPlay = useCallback(
     async (track: Track, list: Track[], i: number) => {
@@ -155,6 +156,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setError(null);
       setLoading(true);
       suppressErrorRef.current = true;
+      dashRetriedRef.current = false;
       advancingRef.current = true;
 
       const audio = audioRef.current;
@@ -191,6 +193,34 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
             }
           };
           const failed = (event: unknown) => {
+            if (indexRef.current !== i) return;
+            if (!dashRetriedRef.current) {
+              dashRetriedRef.current = true;
+              destroyDash();
+              const audio = audioRef.current;
+              if (audio) {
+                audio.src = `/api/stream?id=${track.id}`;
+                audio.load();
+                void audio
+                  .play()
+                  .then(() => {
+                    if (indexRef.current === i) {
+                      setIsPlaying(true);
+                      advancingRef.current = false;
+                      suppressErrorRef.current = false;
+                    }
+                  })
+                  .catch(() => {
+                    if (indexRef.current === i) {
+                      setError("DASH playback error");
+                      setIsPlaying(false);
+                      advancingRef.current = false;
+                      suppressErrorRef.current = false;
+                    }
+                  });
+              }
+              return;
+            }
             const detail = event as unknown as { error?: { message?: string } };
             if (indexRef.current === i) {
               setError(detail.error?.message ?? "DASH playback error");
@@ -907,7 +937,7 @@ function Visualizer({
           className="relative z-10 flex h-full flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between gap-4 px-5 pt-5 md:px-8 md:pt-6">
+          <div className="flex items-center justify-between gap-4 pb-5 pl-5 pr-[76px] pt-5 md:pl-8 md:pr-[84px] md:pt-6">
             <div className="flex min-w-0 items-center gap-3">
               <Image
                 src={cover}

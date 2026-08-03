@@ -31,6 +31,7 @@ async function resolveManifest(id: string, quality: string): Promise<string | nu
     if (!b64) return null;
 
     const xml = Buffer.from(b64, "base64").toString("utf-8");
+    if (!/<\s*[Mm][Pp][Dd]\b/.test(xml)) return null;
     return rewriteManifest(xml);
   } catch {
     return null;
