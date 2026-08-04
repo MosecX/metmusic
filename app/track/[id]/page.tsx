@@ -5,6 +5,7 @@ import { getLyrics, getRecommendations, getTrack, checkApiHealth, coverUrl, trac
 import { formatDuration, formatDate } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { ShareButton } from "@/components/share-button";
+import { LyricsPreview } from "@/components/lyrics-preview";
 import { TrackList } from "@/components/track-row";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
@@ -98,15 +99,11 @@ export default async function TrackPage({
         </div>
       </div>
 
-      {/* Lyrics */}
+      {/* Lyrics preview */}
       {lyricsData?.text && (
         <section className="mb-10">
           <h2 className="mb-3 text-xl font-bold text-white">Lyrics</h2>
-          <div className="max-h-80 overflow-y-auto rounded-2xl glass-soft p-6">
-            <p className="whitespace-pre-line text-sm leading-relaxed text-white/80">
-              {lyricsData.text}
-            </p>
-          </div>
+          <LyricsPreview text={lyricsData.text} />
         </section>
       )}
 

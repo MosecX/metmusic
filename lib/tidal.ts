@@ -340,8 +340,18 @@ export async function getMix(
 export async function getLyrics(
   id: string | number
 ): Promise<{ text?: string; subtitle?: string } | null> {
-  const data = await apiFetch<{ lyrics?: { text?: string; subtitle?: string } | null }>(
-    `/lyrics/?id=${id}`
-  );
-  return data.lyrics ?? null;
+  const data = await apiFetch<{
+    lyrics?: {
+      lyrics?: string;
+      subtitles?: string;
+      text?: string;
+      subtitle?: string;
+    } | null;
+  }>(`/lyrics/?id=${id}`);
+  const lyrics = data.lyrics;
+  if (!lyrics) return null;
+  return {
+    text: lyrics.lyrics ?? lyrics.text,
+    subtitle: lyrics.subtitles ?? lyrics.subtitle,
+  };
 }

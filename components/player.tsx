@@ -17,6 +17,7 @@ import { type Track, coverUrl, trackArtists } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { QualityBadgeView } from "@/components/quality-badge";
 import { LyricsSection } from "@/components/lyrics";
+import { QueuePanel } from "@/components/queue-panel";
 import type * as dashjs from "dashjs";
 
 import {
@@ -26,6 +27,7 @@ import {
   IconPause,
   IconPlay,
   IconPrev,
+  IconQueue,
   IconRepeat,
   IconShuffle,
   IconSparkle,
@@ -65,6 +67,7 @@ interface StreamInfo {
 interface PlayerState {
   currentTrack: Track | null;
   queue: Track[];
+  currentIndex: number;
   isPlaying: boolean;
   loading: boolean;
   currentTime: number;
@@ -74,6 +77,7 @@ interface PlayerState {
   repeat: RepeatMode;
   error: string | null;
   playingQuality: string | null;
+  visualizerOpen: boolean;
   playTrack: (track: Track, queue?: Track[]) => void;
   playQueue: (queue: Track[], index: number) => void;
   toggle: () => void;
@@ -83,6 +87,10 @@ interface PlayerState {
   setVolume: (v: number) => void;
   toggleShuffle: () => void;
   cycleRepeat: () => void;
+  jumpTo: (index: number) => void;
+  removeFromQueue: (index: number) => void;
+  openVisualizer: () => void;
+  closeVisualizer: () => void;
   getAudio: () => HTMLAudioElement | null;
 }
 
@@ -103,6 +111,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeat, setRepeat] = useState<RepeatMode>("off");
   const [error, setError] = useState<string | null>(null);
   const [playingQuality, setPlayingQuality] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [visualizerOpen, setVisualizerOpen] = useState(false);
 
   const indexRef = useRef(-1);
   const queueRef = useRef<Track[]>([]);
@@ -146,6 +156,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const loadAndPlay = useCallback(
     async (track: Track, list: Track[], i: number) => {
       indexRef.current = i;
+      setCurrentIndex(i);
       setQueue(list);
       setCurrentTrack(track);
       try {
@@ -371,6 +382,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
   const getAudio = useCallback(() => audioRef.current, []);
 
+  const jumpTo = useCallback(
+    (index: number) => {
+      const list = queueRef.current;
+      if (index < 0 || index >= list.length || index === indexRef.current) return;
+      void loadAndPlay(list[index], list, index);
+    },
+    [loadAndPlay]
+  );
+
+  const removeFromQueue = useCallback((index: number) => {
+    const list = queueRef.current;
+    if (index < 0 || index >= list.length || index === indexRef.current) return;
+    const next = list.filter((_, i) => i !== index);
+    if (index < indexRef.current) indexRef.current -= 1;
+    queueRef.current = next;
+    setQueue(next);
+  }, []);
+
+  const openVisualizer = useCallback(() => setVisualizerOpen(true), []);
+  const closeVisualizer = useCallback(() => setVisualizerOpen(false), []);
+
   const stateRef = useRef({ isPlaying, currentTime, duration, volume, currentTrack });
   const toggleRef = useRef(toggle);
   const nextRef = useRef(next);
@@ -515,6 +547,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     () => ({
       currentTrack,
       queue,
+      currentIndex,
       isPlaying,
       loading,
       currentTime,
@@ -524,6 +557,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       repeat,
       error,
       playingQuality,
+      visualizerOpen,
       playTrack,
       playQueue,
       toggle,
@@ -533,11 +567,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setVolume,
       toggleShuffle,
       cycleRepeat,
+      jumpTo,
+      removeFromQueue,
+      openVisualizer,
+      closeVisualizer,
       getAudio,
     }),
     [
       currentTrack,
       queue,
+      currentIndex,
       isPlaying,
       loading,
       currentTime,
@@ -547,6 +586,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       repeat,
       error,
       playingQuality,
+      visualizerOpen,
       playTrack,
       playQueue,
       toggle,
@@ -556,6 +596,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setVolume,
       toggleShuffle,
       cycleRepeat,
+      jumpTo,
+      removeFromQueue,
+      openVisualizer,
+      closeVisualizer,
       getAudio,
     ]
   );
@@ -604,6 +648,9 @@ export function PlayerBar() {
     repeat,
     error,
     playingQuality,
+    visualizerOpen,
+    openVisualizer,
+    closeVisualizer,
     toggle,
     next,
     prev,
@@ -613,7 +660,8 @@ export function PlayerBar() {
     cycleRepeat,
   } = usePlayer();
 
-  const [visualizerOpen, setVisualizerOpen] = useState(false);
+  const [queueOpen, setQueueOpen] = useState(false);
+  const [mobileQueueOpen, setMobileQueueOpen] = useState(false);
 
   const cover = currentTrack ? coverUrl(currentTrack.album?.cover, 160) : null;
   const bigCover = currentTrack ? coverUrl(currentTrack.album?.cover, 1280) : null;
@@ -623,8 +671,8 @@ export function PlayerBar() {
 
   const quality = playingQuality ?? currentTrack?.audioQuality ?? null;
 
-  const openVisualizer = () => {
-    if (currentTrack) setVisualizerOpen(true);
+  const requestOpenVisualizer = () => {
+    if (currentTrack) openVisualizer();
   };
 
   return (
@@ -635,7 +683,7 @@ export function PlayerBar() {
           {cover ? (
             <button
               type="button"
-              onClick={openVisualizer}
+              onClick={requestOpenVisualizer}
               aria-label="Open visualizer"
               className="shrink-0 cursor-pointer"
             >
@@ -695,7 +743,31 @@ export function PlayerBar() {
             >
               <IconNext className="h-5 w-5" />
             </button>
+            <button
+              type="button"
+              onClick={() => setMobileQueueOpen(true)}
+              aria-label="Queue"
+              title="Queue"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition hover:text-white"
+            >
+              <IconQueue className="h-5 w-5" />
+            </button>
           </div>
+          {mobileQueueOpen &&
+            createPortal(
+              <div
+                className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60"
+                onClick={() => setMobileQueueOpen(false)}
+              >
+                <div
+                  className="glass-strong max-h-[70vh] overflow-hidden rounded-t-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <QueuePanel onClose={() => setMobileQueueOpen(false)} />
+                </div>
+              </div>,
+              document.body
+            )}
         </div>
         <div className="flex w-full items-center gap-2 text-[11px] tabular-nums text-white/50">
           <span className="w-9 shrink-0 text-right">{formatDuration(currentTime)}</span>
@@ -721,7 +793,7 @@ export function PlayerBar() {
           {cover ? (
             <button
               type="button"
-              onClick={openVisualizer}
+              onClick={requestOpenVisualizer}
               aria-label="Open visualizer"
               className="group relative shrink-0 cursor-pointer"
               title="Open visualizer"
@@ -835,6 +907,26 @@ export function PlayerBar() {
               {error}
             </span>
           )}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setQueueOpen((o) => !o)}
+              aria-label="Queue"
+              title="Queue"
+              className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
+                queueOpen
+                  ? "bg-white/10 text-white"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <IconQueue className="h-5 w-5" />
+            </button>
+            {queueOpen && (
+              <div className="absolute bottom-full right-0 mb-3 w-80 overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c12]/95 shadow-2xl shadow-black/70 backdrop-blur-xl">
+                <QueuePanel onClose={() => setQueueOpen(false)} />
+              </div>
+            )}
+          </div>
           <IconVolume className="h-4 w-4 text-white/60" />
           <input
             type="range"
@@ -858,7 +950,7 @@ export function PlayerBar() {
               title={currentTrack.title}
               artist={trackArtists(currentTrack)}
               quality={quality}
-              onClose={() => setVisualizerOpen(false)}
+              onClose={closeVisualizer}
             />,
             document.body
           )
@@ -900,6 +992,7 @@ function Visualizer({
   } = usePlayer();
 
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [vzQueueOpen, setVzQueueOpen] = useState(false);
 
   useEffect(() => {
     const dlg = dialogRef.current;
@@ -1022,6 +1115,21 @@ function Visualizer({
             >
               <IconRepeat className="h-4 w-4" />
             </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setVzQueueOpen((o) => !o)}
+                aria-label="Queue"
+                className={`${iconBtn} ${vzQueueOpen ? "!text-yellow-300" : ""}`}
+              >
+                <IconQueue className="h-5 w-5" />
+              </button>
+              {vzQueueOpen && (
+                <div className="absolute bottom-full right-0 mb-3 w-80 max-h-[50vh] overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c12]/95 shadow-2xl shadow-black/70 backdrop-blur-xl">
+                  <QueuePanel onClose={() => setVzQueueOpen(false)} />
+                </div>
+              )}
+            </div>
             <div className="ml-4 hidden items-center gap-2 md:flex">
               <IconVolume className="h-4 w-4 text-white/60" />
               <input
