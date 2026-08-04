@@ -725,7 +725,7 @@ export function PlayerBar() {
               type="button"
               onClick={toggle}
               aria-label={isPlaying ? "Pause" : "Play"}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black shadow-lg shadow-white/20 transition hover:scale-105"
+              className={`flex h-11 w-11 items-center justify-center rounded-full bg-white text-black shadow-lg shadow-white/20 transition hover:scale-105 ${isPlaying && !loading ? "play-pulse" : ""}`}
             >
               {loading ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-black" />

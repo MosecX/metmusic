@@ -15,6 +15,7 @@ import {
 import { CardGrid, AlbumCard } from "@/components/cards";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
+import { Reveal } from "@/components/reveal";
 import { IconPlay } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
 
@@ -89,7 +90,8 @@ export default async function HomePage() {
 
       {/* Hero */}
       {heroTrack && (
-        <section className="glass relative mb-10 overflow-hidden rounded-3xl">
+        <Reveal>
+          <section className="glass relative mb-10 overflow-hidden rounded-3xl">
           {heroCover && (
             <div
               className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl"
@@ -135,8 +137,9 @@ export default async function HomePage() {
                 )}
               </div>
             </div>
-          </div>
-        </section>
+            </div>
+          </section>
+        </Reveal>
       )}
 
       {/* Recommended tracks */}

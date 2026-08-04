@@ -14,7 +14,7 @@ export default function Sidebar() {
     <aside className="glass fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 p-4 lg:flex">
       <div className="mb-6 flex items-center justify-between px-2">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
+          <span className="logo-grad flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
             <IconSparkle className="h-5 w-5" />
           </span>
           <span className="text-lg font-bold tracking-tight text-white">

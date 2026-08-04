@@ -50,10 +50,10 @@ export default function RootLayout({
           aria-hidden
           className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         >
-          <div className="absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-cyan-500/20 blur-[130px]" />
-          <div className="absolute -right-32 top-1/4 h-[32rem] w-[32rem] rounded-full bg-fuchsia-500/15 blur-[130px]" />
-          <div className="absolute -bottom-40 left-1/3 h-[34rem] w-[34rem] rounded-full bg-indigo-500/15 blur-[130px]" />
-          <div className="absolute right-1/4 top-2/3 h-[20rem] w-[20rem] rounded-full bg-violet-500/10 blur-[100px]" />
+          <div className="blob absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-cyan-500/20 blur-[130px]" />
+          <div className="blob absolute -right-32 top-1/4 h-[32rem] w-[32rem] rounded-full bg-fuchsia-500/15 blur-[130px]" />
+          <div className="blob absolute -bottom-40 left-1/3 h-[34rem] w-[34rem] rounded-full bg-indigo-500/15 blur-[130px]" />
+          <div className="blob absolute right-1/4 top-2/3 h-[20rem] w-[20rem] rounded-full bg-violet-500/10 blur-[100px]" />
         </div>
 
         <PlayerProvider>
@@ -62,7 +62,7 @@ export default function RootLayout({
             <div className="flex min-w-0 items-center gap-1">
               <NavButtons />
               <Link href="/" className="flex shrink-0 items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
+                <span className="logo-grad flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">
                   <IconSparkle className="h-5 w-5" />
                 </span>
                 <span className="hidden text-base font-bold tracking-tight text-white sm:inline">

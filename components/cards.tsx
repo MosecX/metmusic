@@ -21,10 +21,11 @@ export function AlbumCard({ album, size = 220 }: { album: AlbumLite; size?: numb
       <Link
         href={`/album/${album.id}`}
         onContextMenu={openFromEvent}
-        className="glass-card group flex w-full min-w-0 flex-col rounded-2xl p-3"
+        className="glass-card card-lift group flex w-full min-w-0 flex-col rounded-2xl p-3"
         style={{ maxWidth: size }}
       >
         <div className="relative mb-3 aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-white/5">
+          <span aria-hidden className="shine" />
           {src ? (
             <Image
               src={src}
@@ -80,10 +81,11 @@ export function MixCard({ mix, size = 220 }: { mix: TrackMix; size?: number }) {
       <Link
         href={`/mix/${mix.id}`}
         onContextMenu={openFromEvent}
-        className="glass-card group flex w-full min-w-0 flex-col rounded-2xl p-3"
+        className="glass-card card-lift group flex w-full min-w-0 flex-col rounded-2xl p-3"
         style={{ maxWidth: size }}
       >
         <div className="relative mb-3 aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-white/5">
+          <span aria-hidden className="shine" />
           {src ? (
             <Image
               src={src}
@@ -130,10 +132,11 @@ export function ArtistCard({ artist, size = 220 }: { artist: ArtistLite; size?: 
   return (
     <Link
       href={`/artist/${artist.id}`}
-      className="glass-card group flex w-full min-w-0 flex-col rounded-2xl p-3"
+      className="glass-card card-lift group flex w-full min-w-0 flex-col rounded-2xl p-3"
       style={{ maxWidth: size }}
     >
       <div className="relative mb-3 aspect-square w-full shrink-0 overflow-hidden rounded-full bg-white/5">
+        <span aria-hidden className="shine" />
         {src ? (
           <Image
             src={src}
@@ -176,7 +179,7 @@ export function CardGrid({
           )}
         </div>
       )}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="stagger-fade grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {children}
       </div>
     </section>

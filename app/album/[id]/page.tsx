@@ -6,6 +6,7 @@ import { formatDuration } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { ShareButton } from "@/components/share-button";
 import { TrackList } from "@/components/track-row";
+import { Reveal } from "@/components/reveal";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
 
@@ -38,7 +39,8 @@ export default async function AlbumPage({
   return (
     <div>
       {/* Header */}
-      <div className="glass mb-8 flex flex-col gap-6 rounded-3xl p-6 md:flex-row md:items-end md:gap-8 md:p-8">
+      <Reveal>
+        <div className="glass mb-8 flex flex-col gap-6 rounded-3xl p-6 md:flex-row md:items-end md:gap-8 md:p-8">
         <div className="shrink-0">
           {cover ? (
             <Image
@@ -85,6 +87,7 @@ export default async function AlbumPage({
           </div>
         </div>
       </div>
+      </Reveal>
 
       {/* Track list */}
       {tracks.length > 0 && <TrackList tracks={tracks} />}

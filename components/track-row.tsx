@@ -217,7 +217,7 @@ export function TrackList({
   className?: string;
 }) {
   return (
-    <div className={`glass rounded-2xl p-2 ${className}`}>
+    <div className={`glass stagger-fade rounded-2xl p-2 ${className}`}>
       {tracks.map((track, i) => (
         <TrackRow
           key={track.id}
