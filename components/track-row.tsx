@@ -68,6 +68,7 @@ function TrackRow({
         }
       },
     },
+    { label: "Go to track", onSelect: () => router.push(`/track/${track.id}`) },
     ...(artistId
       ? [{ label: "Go to artist", onSelect: () => router.push(`/artist/${artistId}`) }]
       : []),
