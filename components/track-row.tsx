@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { usePlayer } from "@/components/player";
 import { coverUrl, trackArtists, type Track } from "@/lib/tidal";
 import { formatDuration } from "@/lib/utils";
 import { QualityBadge } from "@/components/quality-badge";
-import { ShareButton } from "@/components/share-button";
-import { IconPause, IconPlay, IconSparkle } from "@/components/icons";
+import { ContextMenu, shareItem, useContextMenu, type MenuItem } from "@/components/context-menu";
+import { IconDots, IconPause, IconPlay, IconSparkle } from "@/components/icons";
 
 function TrackRow({
   track,
@@ -23,6 +24,8 @@ function TrackRow({
   onPlay?: () => void;
 }) {
   const { currentTrack, isPlaying, playTrack, toggle } = usePlayer();
+  const router = useRouter();
+  const { menu, openAt, openFromEvent, close } = useContextMenu();
   const isCurrent = currentTrack?.id === track.id;
   const playing = isCurrent && isPlaying;
   const cover = coverUrl(track.album?.cover, 160);
@@ -36,12 +39,41 @@ function TrackRow({
     onPlay?.();
   };
 
+  const artistId = track.artist?.id ?? track.artists?.[0]?.id ?? "";
+  const albumId = track.album?.id ?? "";
+  const menuItems: MenuItem[] = [
+    shareItem(track.title, `/track/${track.id}`),
+    {
+      label: playing ? "Pause" : "Play",
+      icon: playing ? (
+        <IconPause className="h-4 w-4" />
+      ) : (
+        <IconPlay className="h-4 w-4" />
+      ),
+      onSelect: () => {
+        if (isCurrent) {
+          toggle();
+        } else {
+          playTrack(track, queue);
+        }
+      },
+    },
+    ...(artistId
+      ? [{ label: "Go to artist", onSelect: () => router.push(`/artist/${artistId}`) }]
+      : []),
+    ...(albumId
+      ? [{ label: "Go to album", onSelect: () => router.push(`/album/${albumId}`) }]
+      : []),
+  ];
+
   return (
-    <div
-      className={`group relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-white/10 md:grid-cols-[2rem_minmax(0,2fr)_minmax(0,1fr)_3rem_4rem] md:gap-4 ${
-        isCurrent ? "bg-white/10" : ""
-      }`}
-    >
+    <>
+      <div
+        onContextMenu={openFromEvent}
+        className={`group relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-white/10 md:grid-cols-[2rem_minmax(0,2fr)_minmax(0,1fr)_3rem_4rem] md:gap-4 ${
+          isCurrent ? "bg-white/10" : ""
+        }`}
+      >
       <button
         type="button"
         aria-label={`${playing ? "Pause" : "Play"} ${track.title}`}
@@ -144,12 +176,19 @@ function TrackRow({
             <IconSparkle className="h-5 w-5" />
           </Link>
         )}
-        <ShareButton
-          title={track.title}
-          url={`/track/${track.id}`}
-          size="sm"
-          iconOnly
-        />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const rect = e.currentTarget.getBoundingClientRect();
+            openAt(rect.right, rect.bottom);
+          }}
+          aria-label="More options"
+          title="More options"
+          className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white"
+        >
+          <IconDots className="h-5 w-5" />
+        </button>
         {track.explicit && (
           <span
             className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/10 text-[8px] font-bold text-white/60"
@@ -159,7 +198,9 @@ function TrackRow({
           </span>
         )}
       </div>
-    </div>
+      </div>
+      <ContextMenu menu={menu} items={menuItems} onClose={close} />
+    </>
   );
 }
 
