@@ -11,7 +11,7 @@ const links = [
 
 export default function Sidebar() {
   return (
-    <aside className="glass fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 p-4 lg:flex">
+    <aside className="glass slide-in-left fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 p-4 lg:flex">
       <div className="mb-6 flex items-center justify-between px-2">
         <Link href="/" className="flex items-center gap-2">
           <span className="logo-grad flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-fuchsia-500 text-black shadow-lg shadow-fuchsia-500/30">

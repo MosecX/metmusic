@@ -15,7 +15,6 @@ import {
 import { CardGrid, AlbumCard } from "@/components/cards";
 import { PlayAllButton } from "@/components/play-button";
 import { TrackList } from "@/components/track-row";
-import { Reveal } from "@/components/reveal";
 import { IconPlay } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
 
@@ -85,13 +84,12 @@ export default async function HomePage() {
   }
 
   return (
-    <div>
+    <div className="fade-up">
       <ApiStatusBanner />
 
       {/* Hero */}
       {heroTrack && (
-        <Reveal>
-          <section className="glass relative mb-10 overflow-hidden rounded-3xl">
+        <section className="glass relative mb-10 overflow-hidden rounded-3xl">
           {heroCover && (
             <div
               className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl"
@@ -99,7 +97,7 @@ export default async function HomePage() {
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#07070b]/80 via-[#07070b]/40 to-transparent" />
-          <div className="relative flex flex-col gap-6 p-6 md:flex-row md:items-end md:gap-8 md:p-10">
+          <div className="hero-stagger relative flex flex-col gap-6 p-6 md:flex-row md:items-end md:gap-8 md:p-10">
             <div className="shrink-0">
               {heroCover ? (
                 <Image
@@ -108,7 +106,7 @@ export default async function HomePage() {
                   width={224}
                   height={224}
                   sizes="(max-width: 768px) 160px, 224px"
-                  className="h-40 w-40 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-56 md:w-56"
+                  className="float-slow h-40 w-40 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-56 md:w-56"
                 />
               ) : (
                 <div className="h-40 w-40 rounded-2xl bg-white/10 md:h-56 md:w-56" />
@@ -139,7 +137,6 @@ export default async function HomePage() {
             </div>
             </div>
           </section>
-        </Reveal>
       )}
 
       {/* Recommended tracks */}

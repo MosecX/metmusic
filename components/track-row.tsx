@@ -10,6 +10,16 @@ import { QualityBadge } from "@/components/quality-badge";
 import { ContextMenu, shareItem, useContextMenu, type MenuItem } from "@/components/context-menu";
 import { IconDots, IconPause, IconPlay, IconSparkle } from "@/components/icons";
 
+function EqBars() {
+  return (
+    <span className="flex h-3.5 shrink-0 items-end gap-[2px]" aria-hidden>
+      <span className="eq-bar w-[3px] rounded-sm bg-sky-400" />
+      <span className="eq-bar w-[3px] rounded-sm bg-sky-400" />
+      <span className="eq-bar w-[3px] rounded-sm bg-sky-400" />
+    </span>
+  );
+}
+
 function TrackRow({
   track,
   index,
@@ -131,6 +141,7 @@ function TrackRow({
         )}
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2">
+            {playing && <EqBars />}
             <p
               className={`truncate text-sm ${
                 isCurrent ? "font-medium text-sky-400" : "text-white"

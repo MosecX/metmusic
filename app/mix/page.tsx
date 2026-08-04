@@ -51,7 +51,7 @@ export default async function MixPage() {
   const cover = playlist ? playlistCoverUrl(playlist, 1280) : null;
 
   return (
-    <div>
+    <div className="fade-up">
       <ApiStatusBanner />
 
       {/* Featured mix */}

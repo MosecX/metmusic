@@ -35,7 +35,7 @@ export default async function MixDetailPage({
   const cover = mixImageUrl(mix, "LARGE");
 
   return (
-    <div>
+    <div className="fade-up">
       <div className="glass mb-8 flex flex-col gap-6 rounded-3xl p-6 md:flex-row md:items-end md:gap-8 md:p-8">
         <div className="shrink-0">
           {cover ? (
@@ -45,7 +45,7 @@ export default async function MixDetailPage({
               width={240}
               height={240}
               sizes="(max-width: 768px) 192px, 240px"
-              className="h-48 w-48 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-60 md:w-60"
+              className="float-slow h-48 w-48 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-60 md:w-60"
             />
           ) : (
             <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-white/5 text-white/30 md:h-60 md:w-60">

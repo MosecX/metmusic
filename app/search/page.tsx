@@ -16,7 +16,7 @@ export default async function SearchPage({
   const query = Array.isArray(q) ? q[0] : (q ?? "");
 
   return (
-    <div>
+    <div className="fade-up">
       <ApiStatusBanner />
       <h1 className="mb-5 text-2xl font-bold text-white">Search</h1>
       <SearchBox key={query} initial={query} autoFocus className="mb-8 max-w-xl" />

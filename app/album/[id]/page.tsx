@@ -37,10 +37,9 @@ export default async function AlbumPage({
   const artistLink = `/artist/${artists[0]?.id ?? ""}`;
 
   return (
-    <div>
+    <div className="fade-up">
       {/* Header */}
-      <Reveal>
-        <div className="glass mb-8 flex flex-col gap-6 rounded-3xl p-6 md:flex-row md:items-end md:gap-8 md:p-8">
+      <div className="glass mb-8 flex flex-col gap-6 rounded-3xl p-6 md:flex-row md:items-end md:gap-8 md:p-8">
         <div className="shrink-0">
           {cover ? (
             <Image
@@ -49,7 +48,7 @@ export default async function AlbumPage({
               width={240}
               height={240}
               sizes="(max-width: 768px) 192px, 240px"
-              className="h-48 w-48 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-60 md:w-60"
+              className="float-slow h-48 w-48 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-60 md:w-60"
             />
           ) : (
             <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-white/5 text-white/30 md:h-60 md:w-60">
@@ -87,23 +86,24 @@ export default async function AlbumPage({
           </div>
         </div>
       </div>
-      </Reveal>
 
       {/* Track list */}
       {tracks.length > 0 && <TrackList tracks={tracks} />}
 
       {/* About */}
-      <div className="glass mt-10 rounded-3xl p-6">
-        <h2 className="mb-3 text-lg font-bold text-white">About</h2>
-        <p className="text-sm leading-relaxed text-white/50">
-          {album.copyright ?? `${album.title} by ${artists.map((a) => a.name).join(", ")}`}
-        </p>
-        {album.popularity ? (
-          <p className="mt-2 text-sm text-white/50">
-            Popularity: {album.popularity}
+      <Reveal>
+        <div className="glass mt-10 rounded-3xl p-6">
+          <h2 className="mb-3 text-lg font-bold text-white">About</h2>
+          <p className="text-sm leading-relaxed text-white/50">
+            {album.copyright ?? `${album.title} by ${artists.map((a) => a.name).join(", ")}`}
           </p>
-        ) : null}
-      </div>
+          {album.popularity ? (
+            <p className="mt-2 text-sm text-white/50">
+              Popularity: {album.popularity}
+            </p>
+          ) : null}
+        </div>
+      </Reveal>
     </div>
   );
 }

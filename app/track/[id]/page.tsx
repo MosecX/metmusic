@@ -7,6 +7,7 @@ import { PlayAllButton } from "@/components/play-button";
 import { ShareButton } from "@/components/share-button";
 import { LyricsPreview } from "@/components/lyrics-preview";
 import { TrackList } from "@/components/track-row";
+import { Reveal } from "@/components/reveal";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
 
@@ -43,7 +44,7 @@ export default async function TrackPage({
   const artistLink = `/artist/${track.artist?.id ?? track.artists?.[0]?.id ?? ""}`;
 
   return (
-    <div>
+    <div className="fade-up">
       {/* Header */}
       <div className="glass mb-8 flex flex-col gap-6 rounded-3xl p-6 md:flex-row md:items-end md:gap-8 md:p-8">
         <div className="shrink-0">
@@ -54,7 +55,7 @@ export default async function TrackPage({
               width={240}
               height={240}
               sizes="(max-width: 768px) 192px, 240px"
-              className="h-48 w-48 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-60 md:w-60"
+              className="float-slow h-48 w-48 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-60 md:w-60"
             />
           ) : (
             <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-white/5 text-white/30 md:h-60 md:w-60">
@@ -101,17 +102,20 @@ export default async function TrackPage({
 
       {/* Lyrics preview */}
       {lyricsData?.text && (
-        <section className="mb-10">
-          <h2 className="mb-3 text-xl font-bold text-white">Lyrics</h2>
-          <LyricsPreview text={lyricsData.text} />
-        </section>
+        <Reveal>
+          <section className="mb-10">
+            <h2 className="mb-3 text-xl font-bold text-white">Lyrics</h2>
+            <LyricsPreview text={lyricsData.text} />
+          </section>
+        </Reveal>
       )}
 
       {/* About */}
       {track.album?.title && (
-        <section className="mb-10">
-          <h2 className="mb-3 text-xl font-bold text-white">About this track</h2>
-          <div className="glass-soft rounded-2xl p-6 text-sm text-white/60">
+        <Reveal>
+          <section className="mb-10">
+            <h2 className="mb-3 text-xl font-bold text-white">About this track</h2>
+            <div className="glass-soft rounded-2xl p-6 text-sm text-white/60">
             <p>
               <span className="text-white/80">Track:</span> {track.title}
             </p>
@@ -134,8 +138,9 @@ export default async function TrackPage({
                 <span className="text-white/80">ISRC:</span> {track.isrc}
               </p>
             ) : null}
-          </div>
-        </section>
+            </div>
+          </section>
+        </Reveal>
       )}
 
       {/* Recommendations */}

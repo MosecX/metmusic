@@ -676,7 +676,7 @@ export function PlayerBar() {
   };
 
   return (
-    <div className="glass-strong fixed inset-x-0 bottom-0 z-40 rounded-t-2xl">
+    <div className="glass-strong slide-in-up fixed inset-x-0 bottom-0 z-40 rounded-t-2xl">
       {/* Mobile layout */}
       <div className="flex flex-col gap-1.5 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 md:hidden">
         <div className="flex items-center gap-3">

@@ -58,7 +58,7 @@ export default function RootLayout({
 
         <PlayerProvider>
           {/* Mobile top bar */}
-          <header className="glass-strong sticky top-0 z-30 flex items-center justify-between gap-2 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:hidden">
+          <header className="glass-strong slide-in-down sticky top-0 z-30 flex items-center justify-between gap-2 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:hidden">
             <div className="flex min-w-0 items-center gap-1">
               <NavButtons />
               <Link href="/" className="flex shrink-0 items-center gap-2">

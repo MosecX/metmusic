@@ -21,7 +21,7 @@ export default async function LibraryPage() {
   );
 
   return (
-    <div>
+    <div className="fade-up">
       <ApiStatusBanner />
       <h1 className="mb-8 text-2xl font-bold text-white">Browse playlists</h1>
 
@@ -32,16 +32,17 @@ export default async function LibraryPage() {
         return (
           <section key={cat.q} className="mb-10">
             <h2 className="mb-4 text-xl font-bold text-white">{cat.label}</h2>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="stagger-fade grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {playlists.map((pl) => {
                 const src = playlistCoverUrl(pl, 640);
                 return (
                   <Link
                     key={pl.uuid}
                     href={`/playlist/${pl.uuid}`}
-                    className="glass-card group flex w-full min-w-0 flex-col rounded-2xl p-3"
+                    className="glass-card card-lift group flex w-full min-w-0 flex-col rounded-2xl p-3"
                   >
                     <div className="relative mb-3 aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-white/5">
+                      <span aria-hidden className="shine" />
                       {src ? (
                         <Image
                           src={src}
