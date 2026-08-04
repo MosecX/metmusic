@@ -51,6 +51,7 @@ export function AlbumCard({ album, size = 220 }: { album: AlbumLite; size?: numb
           <button
             type="button"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               const rect = e.currentTarget.getBoundingClientRect();
               openAt(rect.right, rect.bottom);
@@ -102,6 +103,7 @@ export function MixCard({ mix, size = 220 }: { mix: TrackMix; size?: number }) {
           <button
             type="button"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               const rect = e.currentTarget.getBoundingClientRect();
               openAt(rect.right, rect.bottom);

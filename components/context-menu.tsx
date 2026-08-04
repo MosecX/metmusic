@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { IconShare } from "@/components/icons";
 
 export type MenuItem = {
@@ -82,7 +83,7 @@ export function ContextMenu({
   const left = Math.max(8, Math.min(menu.x, window.innerWidth - menuWidth - 8));
   const top = Math.max(8, Math.min(menu.y, window.innerHeight - menuHeight - 8));
 
-  return (
+  const menuEl = (
     <div
       ref={ref}
       role="menu"
@@ -112,6 +113,8 @@ export function ContextMenu({
       ))}
     </div>
   );
+
+  return createPortal(menuEl, document.body);
 }
 
 export function shareItem(title: string, url: string): MenuItem {

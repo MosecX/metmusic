@@ -179,6 +179,7 @@ function TrackRow({
         <button
           type="button"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             const rect = e.currentTarget.getBoundingClientRect();
             openAt(rect.right, rect.bottom);
