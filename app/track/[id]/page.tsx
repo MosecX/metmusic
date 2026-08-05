@@ -2,11 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getLyrics, getRecommendations, getTrack, checkApiHealth, coverUrl, trackArtists } from "@/lib/tidal";
-import { formatDuration, formatDate } from "@/lib/utils";
+import { formatDuration, formatDate, isAtmos } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { ShareButton } from "@/components/share-button";
 import { LyricsPreview } from "@/components/lyrics-preview";
 import { TrackList } from "@/components/track-row";
+import { AtmosBadge } from "@/components/quality-badge";
 import { Reveal } from "@/components/reveal";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
@@ -88,6 +89,7 @@ export default async function TrackPage({
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/40">
             {track.audioQuality && <span>{track.audioQuality.replace(/_/g, " ")}</span>}
+            {isAtmos(track) && <AtmosBadge />}
             {track.bpm ? <span>{track.bpm} BPM</span> : null}
             {track.key ? <span>Key of {track.key} {track.keyScale}</span> : null}
             <span>{formatDuration(track.duration)}</span>

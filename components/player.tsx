@@ -14,8 +14,8 @@ import {
   type ReactNode,
 } from "react";
 import { type Track, coverUrl, trackArtists } from "@/lib/tidal";
-import { formatDuration } from "@/lib/utils";
-import { QualityBadgeView } from "@/components/quality-badge";
+import { formatDuration, isAtmos } from "@/lib/utils";
+import { AtmosBadge, QualityBadgeView } from "@/components/quality-badge";
 import { LyricsSection } from "@/components/lyrics";
 import { QueuePanel } from "@/components/queue-panel";
 import type * as dashjs from "dashjs";
@@ -62,6 +62,7 @@ interface StreamInfo {
   url?: string;
   manifest?: string;
   quality?: string;
+  atmos?: boolean;
 }
 
 interface PlayerState {
@@ -77,6 +78,7 @@ interface PlayerState {
   repeat: RepeatMode;
   error: string | null;
   playingQuality: string | null;
+  playingAtmos: boolean;
   visualizerOpen: boolean;
   playTrack: (track: Track, queue?: Track[]) => void;
   playQueue: (queue: Track[], index: number) => void;
@@ -111,6 +113,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeat, setRepeat] = useState<RepeatMode>("off");
   const [error, setError] = useState<string | null>(null);
   const [playingQuality, setPlayingQuality] = useState<string | null>(null);
+  const [playingAtmos, setPlayingAtmos] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [visualizerOpen, setVisualizerOpen] = useState(false);
 
@@ -176,13 +179,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       destroyDash();
 
       try {
-        const res = await fetch(`/api/stream/info?id=${track.id}`, {
-          cache: "no-store",
-        });
+        const res = await fetch(
+          `/api/stream/info?id=${track.id}${isAtmos(track) ? "&atmos=1" : ""}`,
+          {
+            cache: "no-store",
+          }
+        );
         if (!res.ok) throw new Error(`Stream unavailable (${res.status})`);
         const info = (await res.json()) as StreamInfo;
         if (indexRef.current !== i) return;
         setPlayingQuality(info.quality ?? track.audioQuality ?? null);
+        setPlayingAtmos(info.atmos ?? false);
 
         if (info.mode === "direct" && info.url) {
           audio.src = info.url;
@@ -210,7 +217,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
               destroyDash();
               const audio = audioRef.current;
               if (audio) {
-                audio.src = `/api/stream?id=${track.id}`;
+                audio.src = `/api/stream?id=${track.id}&immersiveaudio=${isAtmos(track) ? "true" : "false"}`;
                 audio.load();
                 void audio
                   .play()
@@ -557,6 +564,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       repeat,
       error,
       playingQuality,
+      playingAtmos,
       visualizerOpen,
       playTrack,
       playQueue,
@@ -586,6 +594,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       repeat,
       error,
       playingQuality,
+      playingAtmos,
       visualizerOpen,
       playTrack,
       playQueue,
@@ -648,6 +657,7 @@ export function PlayerBar() {
     repeat,
     error,
     playingQuality,
+    playingAtmos,
     visualizerOpen,
     openVisualizer,
     closeVisualizer,
@@ -707,6 +717,7 @@ export function PlayerBar() {
                 {currentTrack?.title ?? "Nothing playing"}
               </p>
               {currentTrack && <QualityBadgeView quality={quality} />}
+              {playingAtmos && <AtmosBadge />}
             </div>
             <p className="truncate text-xs text-white/50">
               {currentTrack ? trackArtists(currentTrack) : "Select a track"}
@@ -821,6 +832,7 @@ export function PlayerBar() {
                 {currentTrack?.title ?? "Nothing playing"}
               </p>
               {currentTrack && <QualityBadgeView quality={quality} />}
+              {playingAtmos && <AtmosBadge />}
             </div>
             <p className="truncate text-xs text-white/50">
               {currentTrack ? trackArtists(currentTrack) : "Select a track"}
@@ -950,6 +962,7 @@ export function PlayerBar() {
               title={currentTrack.title}
               artist={trackArtists(currentTrack)}
               quality={quality}
+              atmos={playingAtmos}
               onClose={closeVisualizer}
             />,
             document.body
@@ -964,12 +977,14 @@ function Visualizer({
   title,
   artist,
   quality,
+  atmos,
   onClose,
 }: {
   cover: string;
   title: string;
   artist: string;
   quality: string | null;
+  atmos: boolean;
   onClose: () => void;
 }) {
   const {
@@ -1050,6 +1065,7 @@ function Visualizer({
             {quality && (
               <QualityBadgeView quality={quality} size="lg" className="hidden sm:inline-flex" />
             )}
+            {atmos && <AtmosBadge size="lg" className="hidden sm:inline-flex" />}
           </div>
 
           <LyricsSection

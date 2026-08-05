@@ -42,6 +42,16 @@ export function mediaTags(tags?: string[] | string | null): string[] {
   return list.map((t) => String(t).trim().toUpperCase()).filter(Boolean);
 }
 
+export function isAtmos(a: {
+  audioModes?: string[];
+  mediaMetadata?: { tags?: string[] | string | null } | null;
+} | null | undefined): boolean {
+  if (!a) return false;
+  const modes = (a.audioModes ?? []).map((m) => m.toUpperCase());
+  const tags = mediaTags(a.mediaMetadata?.tags);
+  return modes.includes("DOLBY_ATMOS") || tags.includes("DOLBY_ATMOS");
+}
+
 export interface BadgeMeta {
   label: string;
   cls: string;

@@ -2,10 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAlbum, checkApiHealth, coverUrl } from "@/lib/tidal";
-import { formatDuration } from "@/lib/utils";
+import { formatDuration, isAtmos } from "@/lib/utils";
 import { PlayAllButton } from "@/components/play-button";
 import { ShareButton } from "@/components/share-button";
 import { TrackList } from "@/components/track-row";
+import { AtmosBadge } from "@/components/quality-badge";
 import { Reveal } from "@/components/reveal";
 import { IconMusic } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
@@ -79,6 +80,7 @@ export default async function AlbumPage({
                 <span>{formatDuration(album.duration)}</span>
               </>
             ) : null}
+            {isAtmos(album) && <AtmosBadge />}
           </p>
           <div className="mt-6 flex items-center gap-4">
             <PlayAllButton tracks={tracks} />

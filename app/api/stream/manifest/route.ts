@@ -19,10 +19,10 @@ function rewriteManifest(xml: string): string {
   );
 }
 
-async function resolveManifest(id: string, quality: string): Promise<string | null> {
+async function resolveManifest(id: string, quality: string, immersive: boolean): Promise<string | null> {
   try {
     const res = await fetch(
-      `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=false`,
+      `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=${immersive}`,
       { cache: "no-store" }
     );
     if (!res.ok) return null;
@@ -41,9 +41,10 @@ async function resolveManifest(id: string, quality: string): Promise<string | nu
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   const quality = req.nextUrl.searchParams.get("quality") ?? "HI_RES_LOSSLESS";
+  const immersive = req.nextUrl.searchParams.get("immersiveaudio") !== "false";
   if (!id) return new Response("missing id", { status: 400 });
 
-  const xml = await resolveManifest(id, quality);
+  const xml = await resolveManifest(id, quality, immersive);
   if (!xml) {
     return new Response("manifest unavailable", { status: 502 });
   }

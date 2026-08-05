@@ -2,7 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { qualityClass, qualityShort } from "@/lib/utils";
-import { IconSparkle } from "@/components/icons";
+import { IconAtmos, IconSparkle } from "@/components/icons";
+
+export function AtmosBadge({
+  size = "sm",
+  className = "",
+}: {
+  size?: "sm" | "lg";
+  className?: string;
+}) {
+  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px]";
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/50 bg-cyan-400/15 font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.35)] backdrop-blur-md ${sizeCls} ${className}`}
+      title="Dolby Atmos"
+    >
+      <IconAtmos className="h-2.5 w-2.5" />
+      Atmos
+    </span>
+  );
+}
 
 const cache = new Map<string, string>();
 const inflight = new Map<string, Promise<string | null>>();

@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "@/components/player";
 import { coverUrl, trackArtists, type Track } from "@/lib/tidal";
-import { formatDuration } from "@/lib/utils";
-import { QualityBadge } from "@/components/quality-badge";
+import { formatDuration, isAtmos } from "@/lib/utils";
+import { AtmosBadge, QualityBadge } from "@/components/quality-badge";
 import { ContextMenu, shareItem, useContextMenu, type MenuItem } from "@/components/context-menu";
 import { IconDots, IconPause, IconPlay, IconSparkle } from "@/components/icons";
 
@@ -151,6 +151,7 @@ function TrackRow({
               {track.title}
             </p>
             {track.id && <QualityBadge trackId={track.id} />}
+            {isAtmos(track) && <AtmosBadge />}
           </div>
           <Link
             href={`/artist/${track.artist?.id ?? track.artists?.[0]?.id ?? ""}`}
