@@ -35,3 +35,61 @@ export function qualityClass(q?: string): string {
   if (s === "LOSSY" || s === "LOW") return "border-white/10 bg-white/5 text-white/30";
   return "border-white/15 bg-white/5 text-white/50";
 }
+
+export function mediaTags(tags?: string[] | string | null): string[] {
+  if (!tags) return [];
+  const list = Array.isArray(tags) ? tags : [tags];
+  return list.map((t) => String(t).trim().toUpperCase()).filter(Boolean);
+}
+
+export interface BadgeMeta {
+  label: string;
+  cls: string;
+}
+
+export function albumBadges(a: {
+  type?: string;
+  audioQuality?: string;
+  audioModes?: string[];
+  mediaMetadata?: { tags?: string[] | string | null } | null;
+}): BadgeMeta[] {
+  const badges: BadgeMeta[] = [];
+  const tags = mediaTags(a.mediaMetadata?.tags);
+  const modes = (a.audioModes ?? []).map((m) => m.toUpperCase());
+
+  if (modes.includes("DOLBY_ATMOS") || tags.includes("DOLBY_ATMOS")) {
+    badges.push({
+      label: "ATMOS",
+      cls: "border-cyan-300/50 bg-cyan-400/15 text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.35)]",
+    });
+  }
+  if (tags.includes("HIRES_LOSSLESS") || (a.audioQuality ?? "").toUpperCase().startsWith("HI_RES")) {
+    badges.push({
+      label: "HI-RES",
+      cls: "border-yellow-300/60 bg-gradient-to-r from-yellow-400/25 via-amber-300/20 to-yellow-400/25 text-yellow-200 shadow-[0_0_12px_rgba(250,204,21,0.35)]",
+    });
+  }
+  if (!badges.length && (a.audioQuality ?? "").toUpperCase() === "LOSSLESS") {
+    badges.push({
+      label: "LOSSLESS",
+      cls: "border-white/15 bg-white/5 text-white/50",
+    });
+  }
+  if (a.type === "SINGLE" && !a.audioQuality) {
+    badges.push({ label: "SINGLE", cls: "border-white/10 bg-white/5 text-white/40" });
+  }
+  return badges;
+}
+
+export function albumTypeLabel(type?: string): string {
+  switch (type) {
+    case "ALBUM":
+      return `${type.slice(0, 1)}${type.slice(1).toLowerCase()}`;
+    case "SINGLE":
+      return "Single";
+    case "EP":
+      return "EP";
+    default:
+      return type ?? "";
+  }
+}

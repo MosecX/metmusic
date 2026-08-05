@@ -28,6 +28,13 @@ export interface AlbumLite {
   releaseDate?: string;
   numberOfTracks?: number;
   audioQuality?: string;
+  type?: string;
+  version?: string | null;
+  audioModes?: string[];
+  mediaMetadata?: { tags?: string[] | string | null } | null;
+  popularity?: number;
+  numberOfVolumes?: number;
+  duration?: number;
 }
 
 export interface Track {
@@ -262,14 +269,16 @@ export async function getArtist(id: string | number): Promise<{
 
 export async function getArtistDiscography(
   id: string | number
-): Promise<{ albums: AlbumLite[]; tracks: Track[] }> {
+): Promise<{ albums: AlbumLite[]; tracks: Track[]; version?: string }> {
   const data = await apiFetch<{
+    version?: string;
     albums?: { items?: AlbumLite[] };
     tracks?: Track[];
-  }>(`/artist/?f=${id}&skip_tracks=true`);
+  }>(`/artist/?f=${id}`);
   return {
     albums: data.albums?.items ?? [],
     tracks: data.tracks ?? [],
+    version: data.version,
   };
 }
 

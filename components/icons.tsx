@@ -207,3 +207,15 @@ export function IconRefresh(props: IconProps) {
     </svg>
   );
 }
+
+export function IconAtmos(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" {...props}>
+      <path d="M12 3a9 9 0 0 1 9 9" />
+      <path d="M12 3a9 9 0 0 0-9 9" />
+      <path d="M12 8a4 4 0 0 1 4 4" />
+      <path d="M12 8a4 4 0 0 0-4 4" />
+      <path d="M12 13a1 1 0 1 1 0 .01" />
+    </svg>
+  );
+}
