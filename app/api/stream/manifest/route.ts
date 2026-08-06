@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { requireApiBase } from "@/lib/tidal";
 
+const PROBE_TIMEOUT = 15000;
+
 function rewriteUrl(url: string): string {
   const masked = url
     .replace(/\$Number\$/g, "__NUMBER__")
@@ -23,7 +25,7 @@ async function resolveManifest(id: string, quality: string, immersive: boolean):
   try {
     const res = await fetch(
       `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=${immersive}`,
-      { cache: "no-store" }
+      { cache: "no-store", signal: AbortSignal.timeout(PROBE_TIMEOUT) }
     );
     if (!res.ok) return null;
     const body = (await res.json()) as { data?: { manifest?: string } };

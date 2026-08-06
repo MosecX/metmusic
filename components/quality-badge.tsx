@@ -15,7 +15,7 @@ export function AtmosBadge({
   return (
     <span
       className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/50 bg-cyan-400/15 font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.35)] backdrop-blur-md ${sizeCls} ${className}`}
-      title="Dolby Atmos"
+      title="Dolby Atmos (spatial) — playback not guaranteed"
     >
       <IconAtmos className="h-2.5 w-2.5" />
       Atmos

@@ -1,11 +1,13 @@
 import type { NextRequest } from "next/server";
 import { requireApiBase } from "@/lib/tidal";
 
+const PROBE_TIMEOUT = 15000;
+
 async function resolveTrackUrl(id: string, quality: string, immersive: boolean): Promise<string | null> {
   try {
     const res = await fetch(
       `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=${immersive}`,
-      { cache: "no-store" }
+      { cache: "no-store", signal: AbortSignal.timeout(PROBE_TIMEOUT) }
     );
     if (!res.ok) return null;
     const body = (await res.json()) as { data?: { manifest?: string } };
@@ -23,7 +25,10 @@ async function resolveStreamUrl(id: string, src: string, quality: string, immers
     return resolveTrackUrl(id, quality, immersive);
   }
   try {
-    const res = await fetch(`${requireApiBase()}/trackv2/?id=${id}`, { cache: "no-store" });
+    const res = await fetch(`${requireApiBase()}/trackv2/?id=${id}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(PROBE_TIMEOUT),
+    });
     if (!res.ok) return null;
     const body = (await res.json()) as { data?: { url?: string } };
     return body.data?.url ?? null;

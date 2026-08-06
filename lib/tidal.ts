@@ -152,28 +152,56 @@ export class ApiFetchError extends Error {
   }
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${requireApiBase()}${path}`, {
-    ...init,
-    cache: "no-store",
-    headers: {
-      Accept: "application/json",
-      ...(init?.headers ?? {}),
-    },
-  });
+const API_TIMEOUT = 15000;
+const API_MAX_RETRIES = 2;
 
-  if (!res.ok) {
-    let detail = `API error ${res.status}`;
-    try {
-      const body = (await res.json()) as ApiError;
-      if (body?.detail) detail = String(body.detail);
-    } catch {
-      /* ignore */
-    }
-    throw new ApiFetchError(detail, res.status);
+function shouldRetryApi(e: unknown, attempt: number): boolean {
+  if (attempt >= API_MAX_RETRIES) return false;
+  if (e instanceof ApiFetchError) {
+    return e.status === 429 || e.status === 502 || e.status === 503;
   }
+  return true;
+}
 
-  return (await res.json()) as T;
+async function apiFetch<T>(
+  path: string,
+  init?: RequestInit,
+  options?: { timeout?: number; retries?: number }
+): Promise<T> {
+  const timeout = options?.timeout ?? API_TIMEOUT;
+  const maxRetries = options?.retries ?? API_MAX_RETRIES;
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(`${requireApiBase()}${path}`, {
+        ...init,
+        cache: "no-store",
+        signal: AbortSignal.timeout(timeout),
+        headers: {
+          Accept: "application/json",
+          ...(init?.headers ?? {}),
+        },
+      });
+
+      if (!res.ok) {
+        let detail = `API error ${res.status}`;
+        try {
+          const body = (await res.json()) as ApiError;
+          if (body?.detail) detail = String(body.detail);
+        } catch {
+          /* ignore */
+        }
+        throw new ApiFetchError(detail, res.status);
+      }
+
+      return (await res.json()) as T;
+    } catch (e) {
+      if (!shouldRetryApi(e, attempt)) throw e;
+      lastError = e;
+      await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
+    }
+  }
+  throw lastError;
 }
 
 export interface ApiHealth {
@@ -268,13 +296,17 @@ export async function getArtist(id: string | number): Promise<{
 }
 
 export async function getArtistDiscography(
-  id: string | number
+  id: string | number,
+  options?: { skipTracks?: boolean }
 ): Promise<{ albums: AlbumLite[]; tracks: Track[]; version?: string }> {
+  const skipTracks = options?.skipTracks !== false;
   const data = await apiFetch<{
     version?: string;
     albums?: { items?: AlbumLite[] };
     tracks?: Track[];
-  }>(`/artist/?f=${id}`);
+  }>(`/artist/?f=${id}${skipTracks ? "&skip_tracks=true" : ""}`, undefined, {
+    timeout: 25000,
+  });
   return {
     albums: data.albums?.items ?? [],
     tracks: data.tracks ?? [],

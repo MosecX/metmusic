@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { requireApiBase } from "@/lib/tidal";
 
 const DEFAULT_QUALITY = "HI_RES_LOSSLESS";
+const PROBE_TIMEOUT = 15000;
 
 function isMpd(xml: string): boolean {
   return /<\s*[Mm][Pp][Dd]\b/.test(xml);
@@ -9,7 +10,10 @@ function isMpd(xml: string): boolean {
 
 async function probeTrackv2(id: string): Promise<{ url?: string; quality?: string } | null> {
   try {
-    const res = await fetch(`${requireApiBase()}/trackv2/?id=${id}`, { cache: "no-store" });
+    const res = await fetch(`${requireApiBase()}/trackv2/?id=${id}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(PROBE_TIMEOUT),
+    });
     if (!res.ok) return null;
     const body = (await res.json()) as { data?: { url?: string; quality?: string } };
     return body.data ?? null;
@@ -26,7 +30,7 @@ async function probeTrack(
   try {
     const res = await fetch(
       `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=${immersive}`,
-      { cache: "no-store" }
+      { cache: "no-store", signal: AbortSignal.timeout(PROBE_TIMEOUT) }
     );
     if (!res.ok) return null;
     const body = (await res.json()) as { data?: { manifest?: string } };
