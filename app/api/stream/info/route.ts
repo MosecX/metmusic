@@ -10,6 +10,10 @@ interface ProviderPayload {
   trackManifests?: unknown;
 }
 
+function json(body: unknown): Response {
+  return Response.json(body, { headers: { "cache-control": "no-store" } });
+}
+
 function isMpd(xml: string): boolean {
   return /<\s*[Mm][Pp][Dd]\b/.test(xml);
 }
@@ -106,7 +110,7 @@ export async function GET(req: NextRequest) {
   const direct = await probeTrackv2(id, provider);
   if (direct?.url) {
     const atmos = atmosHint ? await detectAtmos(id, provider) : false;
-    return Response.json({
+    return json({
       provider,
       data: {
         mode: "direct",
@@ -126,14 +130,14 @@ export async function GET(req: NextRequest) {
   const atmos = track.actualAtmos || (atmosHint ? await detectAtmos(id, provider) : false);
 
   if (track.kind === "direct") {
-    return Response.json({
+    return json({
       provider,
       data: { mode: "direct", url: track.url, quality: DEFAULT_QUALITY, atmos, playingAtmos: track.actualAtmos },
     });
   }
 
   if (atmos && !track.actualAtmos) {
-    return Response.json({
+    return json({
       provider,
       data: {
         mode: "dash",
@@ -146,7 +150,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return Response.json({
+  return json({
     provider,
     data: {
       mode: "dash",

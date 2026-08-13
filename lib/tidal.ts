@@ -133,6 +133,11 @@ export function pictureUrl(
   return `${IMAGE_BASE}/${picture.replace(/-/g, "/")}/${size}x${size}.jpg`;
 }
 
+export function artworkUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return `/api/artwork?url=${encodeURIComponent(url)}`;
+}
+
 export function trackArtists(track: Track): string {
   const list = track.artists ?? (track.artist ? [track.artist] : []);
   return list.map((a) => a.name).join(", ");

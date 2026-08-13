@@ -1,4 +1,4 @@
-const CACHE = "metmusic-shell-v1";
+const CACHE = "metmusic-shell-v2";
 const SHELL_ASSETS = [
   "/icons/icon-96.png",
   "/icons/icon-192.png",
@@ -33,6 +33,11 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   if (request.mode === "navigate") {
     event.respondWith(

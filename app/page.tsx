@@ -7,6 +7,7 @@ import {
   getRecommendations,
   getTrack,
   searchAlbums,
+  artworkUrl,
   coverUrl,
   trackArtists,
   type AlbumLite,
@@ -93,7 +94,7 @@ export default async function HomePage() {
           {heroCover && (
             <div
               className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl"
-              style={{ backgroundImage: `url(${heroCover})` }}
+              style={{ backgroundImage: `url(${artworkUrl(heroCover)})` }}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#07070b]/80 via-[#07070b]/40 to-transparent" />
@@ -105,6 +106,7 @@ export default async function HomePage() {
                   alt={heroAlbum?.title ?? ""}
                   width={224}
                   height={224}
+                  priority
                   sizes="(max-width: 768px) 160px, 224px"
                   className="float-slow h-40 w-40 rounded-2xl object-cover shadow-2xl shadow-black/60 ring-1 ring-white/10 md:h-56 md:w-56"
                 />

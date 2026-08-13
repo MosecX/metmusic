@@ -5,6 +5,7 @@ import {
   getPlaylist,
   getTrack,
   getMix,
+  artworkUrl,
   playlistCoverUrl,
   type TrackMix,
 } from "@/lib/tidal";
@@ -60,7 +61,7 @@ export default async function MixPage() {
           {cover && (
             <div
               className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl"
-              style={{ backgroundImage: `url(${cover})` }}
+              style={{ backgroundImage: `url(${artworkUrl(cover)})` }}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#07070b]/80 via-[#07070b]/40 to-transparent" />

@@ -13,7 +13,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { type Track, coverUrl, trackArtists } from "@/lib/tidal";
+import { type Track, artworkUrl, coverUrl, trackArtists } from "@/lib/tidal";
 import { formatDuration, isAtmos } from "@/lib/utils";
 import { DolbyStatusBadge, QualityBadgeView } from "@/components/quality-badge";
 import { LyricsSection } from "@/components/lyrics";
@@ -203,7 +203,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           }
         );
         if (!res.ok) throw new Error(`Stream unavailable (${res.status})`);
-        const { data: info } = (await res.json()) as { data: StreamInfo };
+        const { data: info } = (await res.json()) as { data?: StreamInfo };
+        if (!info) throw new Error("Invalid stream info");
         if (indexRef.current !== i) return;
         setPlayingQuality(info.quality ?? track.audioQuality ?? null);
         setPlayingAtmos(info.atmos ?? false);
@@ -1075,8 +1076,8 @@ function Visualizer({
       className="fixed inset-0 z-50 m-0 h-dvh max-h-full w-full max-w-full overflow-hidden border-0 bg-[#050508] p-0"
     >
       <div className="flex h-full w-full flex-col" onClick={onClose}>
-        <div className="vz-layer vz-1" style={{ backgroundImage: `url(${cover})` }} />
-        <div className="vz-layer vz-3" style={{ backgroundImage: `url(${cover})` }} />
+        <div className="vz-layer vz-1" style={{ backgroundImage: `url(${artworkUrl(cover)})` }} />
+        <div className="vz-layer vz-3" style={{ backgroundImage: `url(${artworkUrl(cover)})` }} />
         <div className="absolute inset-0 bg-black/65" />
 
         <button
