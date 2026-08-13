@@ -458,6 +458,19 @@ button:not(:disabled):active {
   }
 }
 
+.dolby-ok {
+  animation: dolby-glow 2.4s ease-in-out infinite;
+}
+@keyframes dolby-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(34, 211, 238, 0.9);
+  }
+}
+
 /* ---- Page entrance ---- */
 .fade-up {
   animation: fade-in-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;

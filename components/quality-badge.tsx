@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { qualityClass, qualityShort } from "@/lib/utils";
-import { IconAtmos, IconSparkle } from "@/components/icons";
+import { IconAtmos, IconSparkle, IconAlert } from "@/components/icons";
 
 export function AtmosBadge({
   size = "sm",
@@ -23,6 +23,43 @@ export function AtmosBadge({
   );
 }
 
+export function DolbyStatusBadge({
+  atmos,
+  playingAtmos,
+  size = "sm",
+  className = "",
+}: {
+  atmos: boolean;
+  playingAtmos: boolean;
+  size?: "sm" | "lg";
+  className?: string;
+}) {
+  if (!atmos) return null;
+  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px]";
+
+  if (playingAtmos) {
+    return (
+      <span
+        className={`dolby-ok inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/60 bg-cyan-400/20 font-bold uppercase tracking-wider text-cyan-100 shadow-[0_0_14px_rgba(34,211,238,0.55)] backdrop-blur-md ${sizeCls} ${className}`}
+        title="Reproduciendo en Dolby Atmos"
+      >
+        <IconAtmos className={size === "lg" ? "h-3 w-3" : "h-2.5 w-2.5"} />
+        Dolby
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-400/60 bg-amber-400/15 font-bold uppercase tracking-wider text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.35)] backdrop-blur-md ${sizeCls} ${className}`}
+      title="Este tema es Dolby Atmos, pero no se pudo reproducir en Dolby — sonando en otro formato"
+    >
+      <IconAlert className={size === "lg" ? "h-3 w-3" : "h-2.5 w-2.5"} />
+      Dolby · FLAC
+    </span>
+  );
+}
+
 const cache = new Map<string, string>();
 const inflight = new Map<string, Promise<string | null>>();
 let chain: Promise<unknown> = Promise.resolve();
@@ -38,8 +75,8 @@ function fetchQuality(trackId: string): Promise<string | null> {
         cache: "no-store",
       });
       if (!res.ok) return null;
-      const data = (await res.json()) as { quality?: string };
-      const q = data.quality ?? null;
+      const body = (await res.json()) as { data?: { quality?: string } };
+      const q = body.data?.quality ?? null;
       if (q) cache.set(trackId, q);
       return q;
     } catch {

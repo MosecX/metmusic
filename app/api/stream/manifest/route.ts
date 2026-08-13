@@ -5,6 +5,7 @@ const PROBE_TIMEOUT = 15000;
 
 function rewriteUrl(url: string): string {
   const masked = url
+    .replace(/&amp;/g, "&")
     .replace(/\$Number\$/g, "__NUMBER__")
     .replace(/\$Time\$/g, "__TIME__");
   const encoded = encodeURIComponent(masked);
@@ -21,10 +22,31 @@ function rewriteManifest(xml: string): string {
   );
 }
 
-async function resolveManifest(id: string, quality: string, immersive: boolean): Promise<string | null> {
+async function resolveManifest(id: string, quality: string, atmos: boolean): Promise<string | null> {
   try {
+    if (atmos) {
+      const tmRes = await fetch(`${requireApiBase()}/trackManifests/?id=${id}`, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(PROBE_TIMEOUT),
+      });
+      if (!tmRes.ok) return null;
+      const tm = (await tmRes.json()) as {
+        data?: { data?: { attributes?: { uri?: string } } };
+      };
+      const uri = tm.data?.data?.attributes?.uri;
+      if (!uri) return null;
+      const mpdRes = await fetch(uri, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(PROBE_TIMEOUT),
+      });
+      if (!mpdRes.ok) return null;
+      const xml = await mpdRes.text();
+      if (!/<\s*[Mm][Pp][Dd]\b/.test(xml)) return null;
+      return rewriteManifest(xml);
+    }
+
     const res = await fetch(
-      `${requireApiBase()}/track/?id=${id}&quality=${quality}&immersiveaudio=${immersive}`,
+      `${requireApiBase()}/track/?id=${id}&quality=${quality}`,
       { cache: "no-store", signal: AbortSignal.timeout(PROBE_TIMEOUT) }
     );
     if (!res.ok) return null;
@@ -43,10 +65,10 @@ async function resolveManifest(id: string, quality: string, immersive: boolean):
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   const quality = req.nextUrl.searchParams.get("quality") ?? "HI_RES_LOSSLESS";
-  const immersive = req.nextUrl.searchParams.get("immersiveaudio") !== "false";
+  const atmos = req.nextUrl.searchParams.get("atmos") === "1";
   if (!id) return new Response("missing id", { status: 400 });
 
-  const xml = await resolveManifest(id, quality, immersive);
+  const xml = await resolveManifest(id, quality, atmos);
   if (!xml) {
     return new Response("manifest unavailable", { status: 502 });
   }

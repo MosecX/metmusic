@@ -15,7 +15,7 @@ import {
 } from "react";
 import { type Track, coverUrl, trackArtists } from "@/lib/tidal";
 import { formatDuration, isAtmos } from "@/lib/utils";
-import { AtmosBadge, QualityBadgeView } from "@/components/quality-badge";
+import { DolbyStatusBadge, QualityBadgeView } from "@/components/quality-badge";
 import { LyricsSection } from "@/components/lyrics";
 import { QueuePanel } from "@/components/queue-panel";
 import type * as dashjs from "dashjs";
@@ -61,8 +61,10 @@ interface StreamInfo {
   mode: "direct" | "dash";
   url?: string;
   manifest?: string;
+  fallbackManifest?: string;
   quality?: string;
   atmos?: boolean;
+  playingAtmos?: boolean;
 }
 
 interface PlayerState {
@@ -79,6 +81,7 @@ interface PlayerState {
   error: string | null;
   playingQuality: string | null;
   playingAtmos: boolean;
+  playingActualAtmos: boolean;
   visualizerOpen: boolean;
   playTrack: (track: Track, queue?: Track[]) => void;
   playQueue: (queue: Track[], index: number) => void;
@@ -114,6 +117,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [playingQuality, setPlayingQuality] = useState<string | null>(null);
   const [playingAtmos, setPlayingAtmos] = useState(false);
+  const [playingActualAtmos, setPlayingActualAtmos] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [visualizerOpen, setVisualizerOpen] = useState(false);
 
@@ -156,6 +160,19 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const suppressErrorRef = useRef(false);
   const dashRetriedRef = useRef(false);
 
+  function supportsEc3(): boolean {
+    try {
+      return (
+        typeof window !== "undefined" &&
+        typeof window.MediaSource !== "undefined" &&
+        typeof window.MediaSource.isTypeSupported === "function" &&
+        window.MediaSource.isTypeSupported('audio/mp4;codecs="ec-3"')
+      );
+    } catch {
+      return false;
+    }
+  }
+
   const loadAndPlay = useCallback(
     async (track: Track, list: Track[], i: number) => {
       indexRef.current = i;
@@ -186,7 +203,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           }
         );
         if (!res.ok) throw new Error(`Stream unavailable (${res.status})`);
-        const info = (await res.json()) as StreamInfo;
+        const { data: info } = (await res.json()) as { data: StreamInfo };
         if (indexRef.current !== i) return;
         setPlayingQuality(info.quality ?? track.audioQuality ?? null);
         setPlayingAtmos(info.atmos ?? false);
@@ -195,64 +212,84 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           audio.src = info.url;
           audio.load();
           await audio.play();
+          setPlayingActualAtmos(info.playingAtmos ?? false);
           setIsPlaying(true);
           advancingRef.current = false;
           suppressErrorRef.current = false;
         } else if (info.mode === "dash" && info.manifest) {
-          const dashjsMod = await import("dashjs");
-          const dp = dashjsMod.MediaPlayer().create();
-          dashPlayerRef.current = dp;
-          dp.initialize(audio, info.manifest, true);
-          const started = () => {
-            if (indexRef.current === i) {
-              setIsPlaying(true);
-              advancingRef.current = false;
-              suppressErrorRef.current = false;
-            }
-          };
-          const failed = (event: unknown) => {
-            if (indexRef.current !== i) return;
-            if (!dashRetriedRef.current) {
-              dashRetriedRef.current = true;
-              destroyDash();
-              const audio = audioRef.current;
-              if (audio) {
-                audio.src = `/api/stream?id=${track.id}&immersiveaudio=${isAtmos(track) ? "true" : "false"}`;
-                audio.load();
-                void audio
-                  .play()
-                  .then(() => {
-                    if (indexRef.current === i) {
-                      setIsPlaying(true);
-                      advancingRef.current = false;
-                      suppressErrorRef.current = false;
-                    }
-                  })
-                  .catch(() => {
-                    if (indexRef.current === i) {
-                      setError("DASH playback error");
-                      setIsPlaying(false);
-                      advancingRef.current = false;
-                      suppressErrorRef.current = false;
-                    }
-                  });
+          const atmosAttempt = info.playingAtmos === true && supportsEc3();
+          let actualAtmos = atmosAttempt;
+          let manifestUrl = actualAtmos
+            ? info.manifest
+            : info.fallbackManifest ?? info.manifest;
+
+          const createDash = async () => {
+            const dashjsMod = await import("dashjs");
+            const dp = dashjsMod.MediaPlayer().create();
+            dashPlayerRef.current = dp;
+            const audio = audioRef.current;
+            if (!audio) return;
+            dp.initialize(audio, manifestUrl, true);
+            const started = () => {
+              if (indexRef.current === i) {
+                setPlayingActualAtmos(actualAtmos);
+                setIsPlaying(true);
+                advancingRef.current = false;
+                suppressErrorRef.current = false;
               }
-              return;
-            }
-            const detail = event as unknown as { error?: { message?: string } };
-            if (indexRef.current === i) {
-              setError(detail.error?.message ?? "DASH playback error");
-              setIsPlaying(false);
-              advancingRef.current = false;
-              suppressErrorRef.current = false;
-            }
+            };
+            const failed = (event: unknown) => {
+              if (indexRef.current !== i) return;
+              if (actualAtmos && info.fallbackManifest) {
+                destroyDash();
+                actualAtmos = false;
+                manifestUrl = info.fallbackManifest;
+                void createDash();
+                return;
+              }
+              if (!dashRetriedRef.current) {
+                dashRetriedRef.current = true;
+                destroyDash();
+                const audio = audioRef.current;
+                if (audio) {
+                  audio.src = `/api/stream?id=${track.id}`;
+                  audio.load();
+                  void audio
+                    .play()
+                    .then(() => {
+                      if (indexRef.current === i) {
+                        setIsPlaying(true);
+                        advancingRef.current = false;
+                        suppressErrorRef.current = false;
+                      }
+                    })
+                    .catch(() => {
+                      if (indexRef.current === i) {
+                        setError("DASH playback error");
+                        setIsPlaying(false);
+                        advancingRef.current = false;
+                        suppressErrorRef.current = false;
+                      }
+                    });
+                }
+                return;
+              }
+              const detail = event as unknown as { error?: { message?: string } };
+              if (indexRef.current === i) {
+                setError(detail.error?.message ?? "DASH playback error");
+                setIsPlaying(false);
+                advancingRef.current = false;
+                suppressErrorRef.current = false;
+              }
+            };
+            const ended = () => {
+              if (indexRef.current === i) handleEndedRef.current();
+            };
+            dashListenersRef.current = [
+              attachDashListeners(dp, dashjsMod.MediaPlayer.events, started, failed, ended),
+            ];
           };
-          const ended = () => {
-            if (indexRef.current === i) handleEndedRef.current();
-          };
-          dashListenersRef.current = [
-            attachDashListeners(dp, dashjsMod.MediaPlayer.events, started, failed, ended),
-          ];
+          void createDash();
         } else {
           throw new Error("No playback source available");
         }
@@ -565,6 +602,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       error,
       playingQuality,
       playingAtmos,
+      playingActualAtmos,
       visualizerOpen,
       playTrack,
       playQueue,
@@ -595,6 +633,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       error,
       playingQuality,
       playingAtmos,
+      playingActualAtmos,
       visualizerOpen,
       playTrack,
       playQueue,
@@ -658,6 +697,7 @@ export function PlayerBar() {
     error,
     playingQuality,
     playingAtmos,
+    playingActualAtmos,
     visualizerOpen,
     openVisualizer,
     closeVisualizer,
@@ -717,7 +757,9 @@ export function PlayerBar() {
                 {currentTrack?.title ?? "Nothing playing"}
               </p>
               {currentTrack && <QualityBadgeView quality={quality} />}
-              {playingAtmos && <AtmosBadge />}
+              {playingAtmos && (
+                <DolbyStatusBadge atmos={playingAtmos} playingAtmos={playingActualAtmos} />
+              )}
             </div>
             <p className="truncate text-xs text-white/50">
               {currentTrack ? trackArtists(currentTrack) : "Select a track"}
@@ -832,7 +874,9 @@ export function PlayerBar() {
                 {currentTrack?.title ?? "Nothing playing"}
               </p>
               {currentTrack && <QualityBadgeView quality={quality} />}
-              {playingAtmos && <AtmosBadge />}
+              {playingAtmos && (
+                <DolbyStatusBadge atmos={playingAtmos} playingAtmos={playingActualAtmos} />
+              )}
             </div>
             <p className="truncate text-xs text-white/50">
               {currentTrack ? trackArtists(currentTrack) : "Select a track"}
@@ -963,6 +1007,7 @@ export function PlayerBar() {
               artist={trackArtists(currentTrack)}
               quality={quality}
               atmos={playingAtmos}
+              actualAtmos={playingActualAtmos}
               onClose={closeVisualizer}
             />,
             document.body
@@ -978,6 +1023,7 @@ function Visualizer({
   artist,
   quality,
   atmos,
+  actualAtmos,
   onClose,
 }: {
   cover: string;
@@ -985,6 +1031,7 @@ function Visualizer({
   artist: string;
   quality: string | null;
   atmos: boolean;
+  actualAtmos: boolean;
   onClose: () => void;
 }) {
   const {
@@ -1065,7 +1112,9 @@ function Visualizer({
             {quality && (
               <QualityBadgeView quality={quality} size="lg" className="hidden sm:inline-flex" />
             )}
-            {atmos && <AtmosBadge size="lg" className="hidden sm:inline-flex" />}
+            {atmos && (
+              <DolbyStatusBadge atmos={atmos} playingAtmos={actualAtmos} />
+            )}
           </div>
 
           <LyricsSection
