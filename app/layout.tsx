@@ -4,6 +4,7 @@ import Link from "next/link";
 import Sidebar from "@/components/sidebar";
 import { PlayerBar, PlayerProvider } from "@/components/player";
 import { PwaRegister } from "@/components/pwa-register";
+import { AndroidBackHandler } from "@/components/android-back";
 import { NavButtons } from "@/components/nav-buttons";
 import { IconHome, IconLibrary, IconSearch, IconSparkle } from "@/components/icons";
 
@@ -97,6 +98,7 @@ export default function RootLayout({
           </div>
           <PlayerBar />
           <PwaRegister />
+          <AndroidBackHandler />
         </PlayerProvider>
       </body>
     </html>

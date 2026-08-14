@@ -1090,7 +1090,7 @@ function Visualizer({
           type="button"
           onClick={onClose}
           aria-label="Close visualizer"
-          className="glass absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white"
+          className="glass absolute right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-20 flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white"
         >
           <IconClose className="h-5 w-5" />
         </button>
@@ -1099,7 +1099,7 @@ function Visualizer({
           className="relative z-10 flex h-full flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between gap-4 pb-5 pl-5 pr-[76px] pt-5 md:pl-8 md:pr-[84px] md:pt-6">
+          <div className="flex items-center justify-between gap-4 pb-5 pl-5 pr-[76px] pt-[calc(env(safe-area-inset-top)+1.25rem)] md:pl-8 md:pr-[84px] md:pt-[calc(env(safe-area-inset-top)+1.5rem)]">
             <div className="flex min-w-0 items-center gap-3">
               <Image
                 src={cover}
@@ -1133,7 +1133,7 @@ function Visualizer({
             onSeek={seek}
           />
 
-          <div className="flex flex-col items-center px-5 pb-6 md:px-8">
+          <div className="flex flex-col items-center px-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:px-8">
             <div className="flex w-full max-w-2xl flex-col items-center gap-3 rounded-2xl bg-black/35 px-5 py-4 backdrop-blur-md ring-1 ring-white/10">
               <div className="flex w-full items-center gap-2 text-[11px] tabular-nums text-white/60">
                 <span className="w-10 text-right">{formatDuration(currentTime)}</span>

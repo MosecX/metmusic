@@ -12,6 +12,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.5.0",
     "@capgo/capacitor-media-session": "^8.0.29",
     "@lit/react": "^1.0.8",
