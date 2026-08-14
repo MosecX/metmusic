@@ -8,7 +8,7 @@ import { coverUrl, trackArtists, type Track } from "@/lib/tidal";
 import { formatDuration, isAtmos } from "@/lib/utils";
 import { AtmosBadge, QualityBadge } from "@/components/quality-badge";
 import { ContextMenu, shareItem, useContextMenu, type MenuItem } from "@/components/context-menu";
-import { IconDots, IconPause, IconPlay } from "@/components/icons";
+import { IconDots, IconPause, IconPlay, IconSparkle } from "@/components/icons";
 
 function EqBars() {
   return (
@@ -74,6 +74,15 @@ function TrackRow({
       : []),
     ...(albumId
       ? [{ label: "Go to album", onSelect: () => router.push(`/album/${albumId}`) }]
+      : []),
+    ...(track.mixes?.TRACK_MIX
+      ? [
+          {
+            label: "Go to mix",
+            icon: <IconSparkle className="h-4 w-4" />,
+            onSelect: () => router.push(`/mix/${track.mixes!.TRACK_MIX}`),
+          },
+        ]
       : []),
   ];
 
