@@ -8,7 +8,7 @@ import { coverUrl, trackArtists, type Track } from "@/lib/tidal";
 import { formatDuration, isAtmos } from "@/lib/utils";
 import { AtmosBadge, QualityBadge } from "@/components/quality-badge";
 import { ContextMenu, shareItem, useContextMenu, type MenuItem } from "@/components/context-menu";
-import { IconDots, IconPause, IconPlay, IconSparkle } from "@/components/icons";
+import { IconDots, IconPause, IconPlay } from "@/components/icons";
 
 function EqBars() {
   return (
@@ -178,17 +178,6 @@ function TrackRow({
       </span>
 
       <div className="flex items-center justify-end gap-2">
-        {track.mixes?.TRACK_MIX && (
-          <Link
-            href={`/mix/${track.mixes.TRACK_MIX}`}
-            onClick={(e) => e.stopPropagation()}
-            aria-label="Open mix"
-            title="Open mix"
-            className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-amber-400"
-          >
-            <IconSparkle className="h-5 w-5" />
-          </Link>
-        )}
         <button
           type="button"
           onClick={(e) => {
