@@ -8,7 +8,7 @@ export function AndroidBackHandler() {
     if (!window.Capacitor?.isNativePlatform?.()) return;
 
     const listener = App.addListener("backButton", ({ canGoBack }) => {
-      const openDialog = document.querySelector("dialog[open]");
+      const openDialog = document.querySelector<HTMLDialogElement>("dialog[open]");
       if (openDialog) {
         openDialog.close();
         return;
