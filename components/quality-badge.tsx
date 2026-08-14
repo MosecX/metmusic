@@ -11,14 +11,14 @@ export function AtmosBadge({
   size?: "sm" | "lg";
   className?: string;
 }) {
-  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px]";
+  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px] max-md:px-1.5 max-md:py-1";
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/50 bg-cyan-400/15 font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.35)] backdrop-blur-md ${sizeCls} ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/50 bg-cyan-400/15 font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.35)] backdrop-blur-md max-md:shadow-none ${sizeCls} ${className}`}
       title="Dolby Atmos (spatial) — playback not guaranteed"
     >
       <IconAtmos className="h-2.5 w-2.5" />
-      Atmos
+      <span className="hidden md:inline">Atmos</span>
     </span>
   );
 }
@@ -35,27 +35,27 @@ export function DolbyStatusBadge({
   className?: string;
 }) {
   if (!atmos) return null;
-  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px]";
+  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px] max-md:px-1.5 max-md:py-1";
 
   if (playingAtmos) {
     return (
       <span
-        className={`dolby-ok inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/60 bg-cyan-400/20 font-bold uppercase tracking-wider text-cyan-100 shadow-[0_0_14px_rgba(34,211,238,0.55)] backdrop-blur-md ${sizeCls} ${className}`}
+        className={`dolby-ok inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-300/60 bg-cyan-400/20 font-bold uppercase tracking-wider text-cyan-100 shadow-[0_0_14px_rgba(34,211,238,0.55)] backdrop-blur-md max-md:shadow-none ${sizeCls} ${className}`}
         title="Reproduciendo en Dolby Atmos"
       >
         <IconAtmos className={size === "lg" ? "h-3 w-3" : "h-2.5 w-2.5"} />
-        Dolby
+        <span className="hidden md:inline">Dolby</span>
       </span>
     );
   }
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-400/60 bg-amber-400/15 font-bold uppercase tracking-wider text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.35)] backdrop-blur-md ${sizeCls} ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-400/60 bg-amber-400/15 font-bold uppercase tracking-wider text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.35)] backdrop-blur-md max-md:shadow-none ${sizeCls} ${className}`}
       title="Este tema es Dolby Atmos, pero no se pudo reproducir en Dolby — sonando en otro formato"
     >
       <IconAlert className={size === "lg" ? "h-3 w-3" : "h-2.5 w-2.5"} />
-      Dolby · FLAC
+      <span className="hidden md:inline">Dolby · FLAC</span>
     </span>
   );
 }
@@ -103,7 +103,7 @@ export function QualityBadgeView({
   const label = qualityShort(quality ?? undefined);
   if (!label) return null;
   const hiRes = (quality ?? "").toUpperCase().startsWith("HI_RES");
-  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px]";
+  const sizeCls = size === "lg" ? "px-3 py-1 text-[11px]" : "px-2 py-0.5 text-[9px] max-md:px-1.5 max-md:py-1";
   return (
     <span
       className={`inline-flex shrink-0 items-center gap-1 rounded-full border font-bold uppercase tracking-wider ${sizeCls} ${qualityClass(
@@ -116,7 +116,7 @@ export function QualityBadgeView({
       ) : (
         <span className="h-1 w-1 rounded-full bg-current opacity-60" />
       )}
-      {label}
+      <span className="hidden md:inline">{label}</span>
     </span>
   );
 }
@@ -149,8 +149,8 @@ export function QualityBadge({
 
   if (state === "loading") {
     return (
-      <span className="inline-flex h-[18px] w-[52px] shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5">
-        <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-yellow-300" />
+      <span className="inline-flex h-[18px] w-[52px] shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 max-md:h-4 max-md:w-4 max-md:border-0 max-md:bg-transparent">
+        <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-yellow-300 max-md:h-2 max-md:w-2" />
       </span>
     );
   }
