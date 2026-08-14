@@ -23,7 +23,7 @@ export default async function PlaylistPage({
 
   let data;
   try {
-    data = await getPlaylist(id, 300);
+    data = await getPlaylist(id);
   } catch {
     notFound();
   }

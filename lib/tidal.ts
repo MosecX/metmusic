@@ -343,12 +343,13 @@ export async function searchPlaylists(
 
 export async function getPlaylist(
   id: string,
-  limit = 300
+  limit = 100
 ): Promise<{ playlist: Playlist; items: Track[] }> {
+  const max = Math.min(limit, 100);
   const data = await apiFetch<{
     playlist?: Playlist;
     items?: (Track | { item?: Track })[];
-  }>(`/playlist/?id=${encodeURIComponent(id)}&limit=${limit}`);
+  }>(`/playlist/?id=${encodeURIComponent(id)}&limit=${max}`);
   const items = (data.items ?? [])
     .map((t) => {
       if (t && "item" in t && t.item) return t.item;
