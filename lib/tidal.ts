@@ -345,11 +345,24 @@ export async function getPlaylist(
   id: string,
   limit = 100
 ): Promise<{ playlist: Playlist; items: Track[] }> {
+  return getPlaylistPage(id, limit, 0);
+}
+
+export async function getPlaylistPage(
+  id: string,
+  limit = 100,
+  offset = 0
+): Promise<{ playlist: Playlist; items: Track[] }> {
   const max = Math.min(limit, 100);
   const data = await apiFetch<{
     playlist?: Playlist;
     items?: (Track | { item?: Track })[];
-  }>(`/playlist/?id=${encodeURIComponent(id)}&limit=${max}`);
+  }>(
+    `/playlist/?id=${encodeURIComponent(id)}&limit=${max}&offset=${Math.max(
+      0,
+      offset
+    )}`
+  );
   const items = (data.items ?? [])
     .map((t) => {
       if (t && "item" in t && t.item) return t.item;
