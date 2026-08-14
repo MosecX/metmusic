@@ -12,7 +12,7 @@ const CARD_SIZES =
   "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw";
 
 export function AlbumCard({ album, size = 220 }: { album: AlbumLite; size?: number }) {
-  const src = coverUrl(album.cover, 640);
+  const src = coverUrl(album.cover, 400);
   const artist = album.artists?.[0]?.name ?? "Album";
   const { menu, openAt, openFromEvent, close } = useContextMenu();
   const menuItems = [shareItem(album.title, `/album/${album.id}`)];
@@ -83,7 +83,7 @@ export function AlbumCard({ album, size = 220 }: { album: AlbumLite; size?: numb
 }
 
 export function DiscographyCard({ album, size = 220 }: { album: AlbumLite; size?: number }) {
-  const src = coverUrl(album.cover, 640);
+  const src = coverUrl(album.cover, 400);
   const { menu, openAt, openFromEvent, close } = useContextMenu();
   const menuItems = [shareItem(album.title, `/album/${album.id}`)];
   const year = album.releaseDate ? new Date(album.releaseDate).getUTCFullYear() : null;
@@ -211,7 +211,7 @@ export function MixCard({ mix, size = 220 }: { mix: TrackMix; size?: number }) {
 }
 
 export function ArtistCard({ artist, size = 220 }: { artist: ArtistLite; size?: number }) {
-  const src = pictureUrl(artist.picture, 750);
+  const src = pictureUrl(artist.picture, 400);
   return (
     <Link
       href={`/artist/${artist.id}`}

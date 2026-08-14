@@ -648,6 +648,20 @@ main h2:hover::after {
     animation: none;
   }
 
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .shine {
+    display: none;
+  }
+
   .reveal {
     opacity: 1;
     transform: none;

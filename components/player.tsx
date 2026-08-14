@@ -81,7 +81,6 @@ interface PlayerState {
   currentIndex: number;
   isPlaying: boolean;
   loading: boolean;
-  currentTime: number;
   duration: number;
   volume: number;
   shuffle: boolean;
@@ -108,6 +107,8 @@ interface PlayerState {
 }
 
 const PlayerContext = createContext<PlayerState | null>(null);
+
+const PlayerTimeContext = createContext(0);
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -596,7 +597,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       currentIndex,
       isPlaying,
       loading,
-      currentTime,
       duration,
       volume,
       shuffle,
@@ -627,7 +627,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       currentIndex,
       isPlaying,
       loading,
-      currentTime,
       duration,
       volume,
       shuffle,
@@ -656,7 +655,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   return (
     <PlayerContext.Provider value={value}>
-      {children}
+      <PlayerTimeContext.Provider value={currentTime}>
+        {children}
       <audio
         ref={audioRef}
         className="hidden"
@@ -676,6 +676,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           }
         }}
       />
+    </PlayerTimeContext.Provider>
     </PlayerContext.Provider>
   );
 }
@@ -686,12 +687,15 @@ export function usePlayer(): PlayerState {
   return ctx;
 }
 
+export function usePlayerTime(): number {
+  return useContext(PlayerTimeContext);
+}
+
 export function PlayerBar() {
   const {
     currentTrack,
     isPlaying,
     loading,
-    currentTime,
     duration,
     volume,
     shuffle,
@@ -711,6 +715,7 @@ export function PlayerBar() {
     toggleShuffle,
     cycleRepeat,
   } = usePlayer();
+  const currentTime = usePlayerTime();
 
   const [queueOpen, setQueueOpen] = useState(false);
   const [mobileQueueOpen, setMobileQueueOpen] = useState(false);
@@ -1040,7 +1045,6 @@ function Visualizer({
     currentTrack,
     isPlaying,
     loading,
-    currentTime,
     duration,
     volume,
     shuffle,
@@ -1054,6 +1058,7 @@ function Visualizer({
     cycleRepeat,
     getAudio,
   } = usePlayer();
+  const currentTime = usePlayerTime();
 
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [vzQueueOpen, setVzQueueOpen] = useState(false);
