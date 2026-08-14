@@ -18,6 +18,14 @@ import { formatDuration, isAtmos } from "@/lib/utils";
 import { DolbyStatusBadge, QualityBadgeView } from "@/components/quality-badge";
 import { LyricsSection } from "@/components/lyrics";
 import { QueuePanel } from "@/components/queue-panel";
+import {
+  clearMediaSessionMetadata,
+  mediaSessionSupported,
+  setMediaSessionActionHandler,
+  setMediaSessionMetadata,
+  setMediaSessionPlaybackState,
+  setMediaSessionPositionState,
+} from "@/lib/media-session";
 import type * as dashjs from "dashjs";
 
 import {
@@ -468,8 +476,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
-    const ms = navigator.mediaSession;
+    if (!mediaSessionSupported()) return;
 
     const handleSeekBackward = (details: MediaSessionActionDetails) => {
       const base = stateRef.current.currentTime;
@@ -484,13 +491,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (typeof details.seekTime === "number") seekRef.current(details.seekTime);
     };
 
-    try { ms.setActionHandler("play", () => { if (!stateRef.current.isPlaying) toggleRef.current(); }); } catch { /* ignore */ }
-    try { ms.setActionHandler("pause", () => { if (stateRef.current.isPlaying) toggleRef.current(); }); } catch { /* ignore */ }
-    try { ms.setActionHandler("previoustrack", () => prevRef.current()); } catch { /* ignore */ }
-    try { ms.setActionHandler("nexttrack", () => nextRef.current()); } catch { /* ignore */ }
-    try { ms.setActionHandler("seekbackward", handleSeekBackward); } catch { /* ignore */ }
-    try { ms.setActionHandler("seekforward", handleSeekForward); } catch { /* ignore */ }
-    try { ms.setActionHandler("seekto", handleSeekTo); } catch { /* ignore */ }
+    setMediaSessionActionHandler("play", () => { if (!stateRef.current.isPlaying) toggleRef.current(); });
+    setMediaSessionActionHandler("pause", () => { if (stateRef.current.isPlaying) toggleRef.current(); });
+    setMediaSessionActionHandler("previoustrack", () => prevRef.current());
+    setMediaSessionActionHandler("nexttrack", () => nextRef.current());
+    setMediaSessionActionHandler("seekbackward", handleSeekBackward);
+    setMediaSessionActionHandler("seekforward", handleSeekForward);
+    setMediaSessionActionHandler("seekto", handleSeekTo);
 
     return () => {
       const actions: MediaSessionAction[] = [
@@ -498,23 +505,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         "seekbackward", "seekforward", "seekto",
       ];
       for (const action of actions) {
-        try { ms.setActionHandler(action, null); } catch { /* ignore */ }
+        setMediaSessionActionHandler(action, null);
       }
     };
   }, []);
 
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
-    const ms = navigator.mediaSession;
+    if (!mediaSessionSupported()) return;
     if (!currentTrack) {
-      ms.metadata = null;
+      clearMediaSessionMetadata();
       return;
     }
     const cover = coverUrl(currentTrack.album?.cover, 640);
     const artwork = cover
       ? [{ src: `/api/artwork?url=${encodeURIComponent(cover)}`, sizes: "640x640", type: "image/jpeg" }]
       : [];
-    ms.metadata = new MediaMetadata({
+    setMediaSessionMetadata({
       title: currentTrack.title,
       artist: trackArtists(currentTrack),
       album: currentTrack.album?.title ?? undefined,
@@ -523,26 +529,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentTrack]);
 
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
-    try {
-      navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-    } catch { /* ignore */ }
+    if (!mediaSessionSupported()) return;
+    setMediaSessionPlaybackState(isPlaying ? "playing" : "paused");
   }, [isPlaying]);
 
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
-    const ms = navigator.mediaSession;
+    if (!mediaSessionSupported()) return;
     if (!currentTrack || !duration) {
-      try { ms.setPositionState?.(); } catch { /* ignore */ }
+      setMediaSessionPositionState();
       return;
     }
-    try {
-      ms.setPositionState({
-        duration,
-        playbackRate: 1,
-        position: Math.min(currentTime, duration),
-      });
-    } catch { /* ignore */ }
+    setMediaSessionPositionState({
+      duration,
+      playbackRate: 1,
+      position: Math.min(currentTime, duration),
+    });
   }, [currentTrack, currentTime, duration]);
 
   useEffect(() => {
