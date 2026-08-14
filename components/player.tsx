@@ -205,8 +205,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       destroyDash();
 
       try {
+        const isNativeClient =
+          typeof window !== "undefined" && !!window.Capacitor?.isNativePlatform?.();
         const res = await fetch(
-          `/api/stream/info?id=${track.id}${isAtmos(track) ? "&atmos=1" : ""}`,
+          `/api/stream/info?id=${track.id}${isAtmos(track) ? "&atmos=1" : ""}${
+            isNativeClient ? "&native=1" : ""
+          }`,
           {
             cache: "no-store",
           }
@@ -248,7 +252,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                 suppressErrorRef.current = false;
               }
             };
-            const failed = (event: unknown) => {
+            const failed = async (event: unknown) => {
               if (indexRef.current !== i) return;
               if (actualAtmos && info.fallbackManifest) {
                 destroyDash();
@@ -262,25 +266,37 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                 destroyDash();
                 const audio = audioRef.current;
                 if (audio) {
-                  audio.src = `/api/stream?id=${track.id}`;
-                  audio.load();
-                  void audio
-                    .play()
-                    .then(() => {
+                  const urls = [
+                    `/api/stream?id=${track.id}`,
+                    `/api/stream?id=${track.id}&src=track&quality=LOSSLESS`,
+                    `/api/stream?id=${track.id}&src=track&quality=HIGH`,
+                  ];
+                  const tryPlay = (url: string) =>
+                    new Promise<boolean>((resolve) => {
+                      audio.src = url;
+                      audio.load();
+                      audio
+                        .play()
+                        .then(() => resolve(true))
+                        .catch(() => resolve(false));
+                    });
+                  for (const url of urls) {
+                    const ok = await tryPlay(url);
+                    if (ok) {
                       if (indexRef.current === i) {
                         setIsPlaying(true);
                         advancingRef.current = false;
                         suppressErrorRef.current = false;
                       }
-                    })
-                    .catch(() => {
-                      if (indexRef.current === i) {
-                        setError("DASH playback error");
-                        setIsPlaying(false);
-                        advancingRef.current = false;
-                        suppressErrorRef.current = false;
-                      }
-                    });
+                      return;
+                    }
+                  }
+                }
+                if (indexRef.current === i) {
+                  setError("DASH playback error");
+                  setIsPlaying(false);
+                  advancingRef.current = false;
+                  suppressErrorRef.current = false;
                 }
                 return;
               }

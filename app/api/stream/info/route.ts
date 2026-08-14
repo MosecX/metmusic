@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return new Response("missing id", { status: 400 });
   const atmosHint = req.nextUrl.searchParams.get("atmos") === "1";
+  const native = req.nextUrl.searchParams.get("native") === "1";
 
   const provider: ProviderPayload = {};
 
@@ -122,19 +123,42 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const track = await probeTrack(id, DEFAULT_QUALITY, provider);
+  // Android WebView cannot decode FLAC through MSE, so on native clients
+  // prefer a direct AAC/mp4 source over a FLAC DASH manifest.
+  const qualities = native
+    ? ["LOSSLESS", "HIGH", DEFAULT_QUALITY]
+    : [DEFAULT_QUALITY];
+
+  let track: Awaited<ReturnType<typeof probeTrack>> = null;
+  let trackQuality = DEFAULT_QUALITY;
+  for (const q of qualities) {
+    track = await probeTrack(id, q, provider);
+    if (!track) break;
+    if (track.kind === "direct") {
+      trackQuality = q;
+      break;
+    }
+  }
   if (!track) {
     return new Response("no playback source", { status: 502 });
   }
 
-  const atmos = track.actualAtmos || (atmosHint ? await detectAtmos(id, provider) : false);
-
   if (track.kind === "direct") {
+    const atmos =
+      track.actualAtmos || (atmosHint ? await detectAtmos(id, provider) : false);
     return json({
       provider,
-      data: { mode: "direct", url: track.url, quality: DEFAULT_QUALITY, atmos, playingAtmos: track.actualAtmos },
+      data: {
+        mode: "direct",
+        url: track.url,
+        quality: trackQuality,
+        atmos,
+        playingAtmos: track.actualAtmos,
+      },
     });
   }
+
+  const atmos = track.actualAtmos || (atmosHint ? await detectAtmos(id, provider) : false);
 
   if (atmos && !track.actualAtmos) {
     return json({
