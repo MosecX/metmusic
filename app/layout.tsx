@@ -45,15 +45,18 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="relative min-h-full bg-[#07070b] text-zinc-100">
-        {/* Aurora background */}
+        {/* Background */}
         <div
           aria-hidden
           className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         >
-          <div className="blob absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-cyan-500/20 blur-[130px]" />
-          <div className="blob absolute -right-32 top-1/4 h-[32rem] w-[32rem] rounded-full bg-fuchsia-500/15 blur-[130px]" />
-          <div className="blob absolute -bottom-40 left-1/3 h-[34rem] w-[34rem] rounded-full bg-indigo-500/15 blur-[130px]" />
-          <div className="blob absolute right-1/4 top-2/3 h-[20rem] w-[20rem] rounded-full bg-violet-500/10 blur-[100px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_18%_0%,#152238_0%,#0a0a12_45%,#07070b_72%)]" />
+          <div className="hidden lg:block">
+            <div className="blob absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-cyan-500/20 blur-[130px]" />
+            <div className="blob absolute -right-32 top-1/4 h-[32rem] w-[32rem] rounded-full bg-fuchsia-500/15 blur-[130px]" />
+            <div className="blob absolute -bottom-40 left-1/3 h-[34rem] w-[34rem] rounded-full bg-indigo-500/15 blur-[130px]" />
+            <div className="blob absolute right-1/4 top-2/3 h-[20rem] w-[20rem] rounded-full bg-violet-500/10 blur-[100px]" />
+          </div>
         </div>
 
         <PlayerProvider>

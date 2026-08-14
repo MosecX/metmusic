@@ -15,7 +15,7 @@ export default async function ApiStatusBanner({
   return (
     <section role="alert" className="glass relative mb-10 overflow-hidden rounded-3xl">
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl"
+        className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl max-lg:blur-lg"
         style={{
           backgroundImage:
             "radial-gradient(circle at 25% 25%, rgba(244,63,94,0.35), transparent 60%)",

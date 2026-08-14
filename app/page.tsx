@@ -93,7 +93,7 @@ export default async function HomePage() {
         <section className="glass relative mb-10 overflow-hidden rounded-3xl">
           {heroCover && (
             <div
-              className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl"
+              className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl max-lg:blur-lg"
               style={{ backgroundImage: `url(${artworkUrl(heroCover)})` }}
             />
           )}
