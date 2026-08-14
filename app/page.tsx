@@ -79,7 +79,7 @@ export default async function HomePage() {
   const { heroTrack, heroAlbum, recs } = data;
 
   const featuredTracks: Track[] = [];
-  const heroCover = heroAlbum?.cover ? coverUrl(heroAlbum.cover, 1280) : null;
+  const heroCover = heroAlbum?.cover ? coverUrl(heroAlbum.cover, 640) : null;
   if (heroAlbum?.items) {
     featuredTracks.push(...heroAlbum.items.map((i) => i.item));
   }

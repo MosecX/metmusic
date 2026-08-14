@@ -49,7 +49,7 @@ export default async function MixPage() {
   const { myMix, mixes } = await getMixData();
   const playlist = myMix?.playlist;
   const tracks = myMix?.items ?? [];
-  const cover = playlist ? playlistCoverUrl(playlist, 1280) : null;
+  const cover = playlist ? playlistCoverUrl(playlist, 640) : null;
 
   return (
     <div className="fade-up">
