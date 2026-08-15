@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: MetMusic — HiFi Web Player
 
-Tidal-inspired web player streaming lossless/Hi-Res FLAC through a Tidal-compatible API proxy. Next.js 16 App Router + React 19 + TypeScript + Tailwind v4.
+Tidal-inspired web player streaming lossless/Hi-Res FLAC through a Tidal-compatible API proxy. Next.js 16 App Router + React 19 + TypeScript + Tailwind v4. Ships as a PWA and an Android app (Capacitor 8). See `README.md` (EN) / `README.es.md` (ES) for the user-facing docs.
 
 ## Commands
 
@@ -22,6 +22,8 @@ Always run `npm run lint` (and a build when the change is server/route-level) af
 - **Metadata never hits the browser directly.** Server components (`app/**/page.tsx`) and API route handlers (`app/api/**`) are the only things allowed to call the API provider. Client components call only the app's own `/api/*` routes.
 - `NEXT_PUBLIC_API_BASE` is read from the environment (never hardcoded). `requireApiBase()` in `lib/tidal.ts` throws a clear error if unset. `.env` is gitignored; `.env.example` is the committed placeholder.
 - **Streaming flow:** `/api/stream/info` probes the provider → `direct` (`/api/stream` proxies a `/trackv2/` URL) or `dash` (`/api/stream/manifest` fetches `/track/`, base64 MPD → rewrites segment URLs to `/api/segment`). `/api/segment` is Range-aware. `/api/artwork` proxies Tidal CDN covers (adds CORS headers; required for Media Session artwork).
+- `/api/stream/info` accepts `&native=1` (native clients prefer direct AAC over FLAC DASH, since the Android WebView can't decode FLAC via MSE) and `&atmos=1`. On DASH failure the player falls back to direct → `LOSSLESS` → `HIGH`.
+- **Long playlists are paginated:** `/api/playlist/[id]/tracks?limit=&offset=` backs the infinite scroll in `components/playlist-content.tsx`.
 - Image URLs are built in `lib/tidal.ts` (`coverUrl`, `pictureUrl`, `mixImageUrl`) → `resources.tidal.com/images/...`. Tidal CDN rejects the `500x500` size (403) — use `640x640` or larger.
 
 ## API provider compatibility
@@ -35,9 +37,19 @@ Always run `npm run lint` (and a build when the change is server/route-level) af
 - TypeScript strict; use `@/` path alias (maps to project root).
 - Follow existing component/file conventions (see `components/`, `lib/`).
 - Player logic lives in `components/player.tsx` (dash.js engine, queue, PlayerBar, Media Session, keyboard shortcuts, visualizer).
+- Media Session helpers live in `lib/media-session.ts` — web via the standard `navigator.mediaSession` + `@capgo/capacitor-media-session` when `window.Capacitor?.isNativePlatform?.()` is truthy.
+- Native back handling lives in `components/android-back.tsx` (`@capacitor/app`): closes open `<dialog>`, else `history.back()`, else `App.minimizeApp()`.
 - Tailwind v4 (CSS-first config, `@import "tailwindcss"`).
+
+## Capacitor / Android
+
+- `capacitor.config.ts`: appId `com.metmusic.app`, `webDir: "web"`, `server.url` points at the deployed web app (the APK is a WebView shell, it doesn't bundle the Next.js server). Do not commit a changed `server.url` without the user asking.
+- Local APK build: `npm run build` → `npx cap sync android` → `cd android && ./gradlew assembleDebug`.
+- `.github/workflows/build-apk.yml` runs on push to `main`: lint → web build → `cap sync` → Gradle debug build → upload `app-debug.apk`.
+- Native-only code must be feature-gated: check `window.Capacitor?.isNativePlatform?.()` and import Capacitor packages only in client components wrapped in `useEffect`.
 
 ## Verification
 
 - Dev/build server may be launched detached; it listens on port 3000. To stop a stray server: kill the process listening on port 3000 (it may be `next dev` or `next start`).
 - Puppeteer-based verification scripts live in `C:\Users\{user}\AppData\Local\Temp\opencode\cdntest\` (Edge headless).
+- Git push in PowerShell prints stderr as a red "error" block but succeeds. The working tree may show a local, uncommitted `capacitor.config.ts` change (user's `server.url`) — leave it alone.

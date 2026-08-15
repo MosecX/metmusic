@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: "MetMusic",
   webDir: "web",
   server: {
-    url: "https://metmusic.moisessampson020110.workers.dev/",
+    url: "https://metmusic.qzz.io/",
   },
 };
 
