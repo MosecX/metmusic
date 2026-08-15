@@ -48,6 +48,13 @@ Always run `npm run lint` (and a build when the change is server/route-level) af
 - `.github/workflows/build-apk.yml` runs on push to `main`: lint → web build → `cap sync` → Gradle debug build → upload `app-debug.apk`.
 - Native-only code must be feature-gated: check `window.Capacitor?.isNativePlatform?.()` and import Capacitor packages only in client components wrapped in `useEffect`.
 
+## Deep links (Android App Links)
+
+- `android/app/src/main/AndroidManifest.xml` declares a `VIEW` intent-filter with `android:autoVerify="true"` for `https://metmusic.qzz.io` → any link on that domain can open `com.metmusic.app`.
+- `public/.well-known/assetlinks.json` maps the domain to `com.metmusic.app`. **The `sha256_cert_fingerprints` value must match the signing key of the installed APK** — the committed one is the base64 of the local debug keystore SHA-256 (`keytool -list -v -keystore ~/.android/debug.keystore`). Debug builds from CI (fresh runner keystore) or a release keystore need a matching fingerprint or links won't auto-verify.
+- `components/deeplink-handler.tsx` (mounted in `app/layout.tsx`) listens for `appUrlOpen` + `getLaunchUrl()` via `@capacitor/app` and `router.push()`es the path (`/album/123`, `/artist/…`, `/track/…`, `/playlist/…`, `/mix/…`, `/search`, `/library`) when host is `metmusic.qzz.io`.
+- Re-run `npx cap sync android` after manifest changes so the Gradle project picks them up.
+
 ## Verification
 
 - Dev/build server may be launched detached; it listens on port 3000. To stop a stray server: kill the process listening on port 3000 (it may be `next dev` or `next start`).
