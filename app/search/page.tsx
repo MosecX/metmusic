@@ -19,7 +19,7 @@ export default async function SearchPage({
     <div className="fade-up">
       <ApiStatusBanner />
       <h1 className="mb-5 text-2xl font-bold text-white">Search</h1>
-      <SearchBox key={query} initial={query} autoFocus className="mb-8 max-w-xl" />
+      <SearchBox initial={query} autoFocus className="mb-8 max-w-xl" />
 
       {!query.trim() && (
         <div className="py-16 text-center text-white/40">

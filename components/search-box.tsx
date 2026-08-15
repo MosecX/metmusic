@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconSearch } from "@/components/icons";
 
 export function SearchBox({
@@ -15,6 +15,13 @@ export function SearchBox({
 }) {
   const router = useRouter();
   const [value, setValue] = useState(initial);
+  const lastTypedAt = useRef(0);
+
+  useEffect(() => {
+    if (Date.now() - lastTypedAt.current > 400) {
+      setValue(initial);
+    }
+  }, [initial]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -37,7 +44,10 @@ export function SearchBox({
         type="search"
         value={value}
         autoFocus={autoFocus}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          lastTypedAt.current = Date.now();
+          setValue(e.target.value);
+        }}
         placeholder="Search tracks, albums, artists..."
         className="glass h-12 w-full rounded-full pl-12 pr-4 text-sm text-white outline-none transition placeholder:text-white/40 focus:bg-white/10"
       />
