@@ -12,6 +12,7 @@ import { TrackList } from "@/components/track-row";
 import { CardGrid, DiscographyCard } from "@/components/cards";
 import { IconAtmos, IconMusic, IconSparkle } from "@/components/icons";
 import ApiStatusBanner from "@/components/api-status";
+import { ShareButton } from "@/components/share-button";
 
 export const metadata = { title: "Artist — MetMusic" };
 
@@ -155,8 +156,9 @@ export default async function ArtistPage({
               )}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 flex items-center gap-4">
               <PlayAllButton tracks={popularTracks} />
+              <ShareButton title={artist.name} />
             </div>
           </div>
         </div>
