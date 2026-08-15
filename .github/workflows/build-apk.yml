@@ -43,11 +43,17 @@ jobs:
         env:
           KEYSTORE_B64: ${{ secrets.METMUSIC_DEBUG_KEYSTORE }}
         run: |
-          if [ -n "$KEYSTORE_B64" ]; then
-            mkdir -p "$HOME/.android"
-            echo "$KEYSTORE_B64" | base64 --decode > "$HOME/.android/debug.keystore"
-          else
-            echo "METMUSIC_DEBUG_KEYSTORE secret not set; a fresh debug keystore will be auto-generated"
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::METMUSIC_DEBUG_KEYSTORE secret is not set; App Links auto-verify will fail."
+            exit 1
+          fi
+          mkdir -p "$HOME/.android"
+          echo "$KEYSTORE_B64" | base64 --decode > "$HOME/.android/debug.keystore"
+          SHA=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey 2>/dev/null | grep "SHA256:" | awk '{print $NF}')
+          echo "keystore SHA256: $SHA"
+          if [ "$SHA" != "EF:F1:6B:A8:70:BF:2E:E9:82:6A:FA:80:1C:33:D4:49:9F:A9:D1:D5:5B:87:B8:76:F8:71:0D:F2:C2:1E:36:10" ]; then
+            echo "::error::Restored keystore fingerprint does not match assetlinks.json"
+            exit 1
           fi
 
       - name: Build debug APK
