@@ -33,7 +33,7 @@ export default async function AlbumPage({
   }
 
   const tracks = album.items.map((i) => i.item);
-  const cover = coverUrl(album.cover, 640);
+  const cover = coverUrl(album.cover, 1080);
   const artists = album.artists ?? (album.artist ? [album.artist] : []);
   const artistLink = `/artist/${artists[0]?.id ?? ""}`;
 

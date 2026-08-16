@@ -52,7 +52,7 @@ export default function RootLayout({
           aria-hidden
           className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_18%_0%,#152238_0%,#0a0a12_45%,#07070b_72%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_18%_0%,#101b2e_0%,#07070d_45%,#040406_72%)]" />
           <div className="hidden lg:block">
             <div className="blob absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-cyan-500/20 blur-[130px]" />
             <div className="blob absolute -right-32 top-1/4 h-[32rem] w-[32rem] rounded-full bg-fuchsia-500/15 blur-[130px]" />
@@ -91,8 +91,8 @@ export default function RootLayout({
 
           <div className="relative z-10">
             <Sidebar />
-            <div className="lg:pl-60">
-              <main className="mx-auto max-w-7xl px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-6 md:px-8 lg:pt-10">
+            <div className="lg:pl-60 2xl:pl-64">
+              <main className="mx-auto max-w-7xl px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-6 md:px-8 lg:pt-10 2xl:max-w-[96rem] 3xl:max-w-[120rem]">
                 {children}
               </main>
             </div>

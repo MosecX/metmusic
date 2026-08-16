@@ -9,7 +9,7 @@ import { IconAtmos, IconDots, IconMusic, IconSparkle } from "@/components/icons"
 import { ContextMenu, shareItem, useContextMenu } from "@/components/context-menu";
 
 const CARD_SIZES =
-  "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw";
+  "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, (max-width: 1536px) 16vw, 14vw";
 
 export function AlbumCard({ album, size = 220 }: { album: AlbumLite; size?: number }) {
   const src = coverUrl(album.cover, 640);
@@ -211,7 +211,7 @@ export function MixCard({ mix, size = 220 }: { mix: TrackMix; size?: number }) {
 }
 
 export function ArtistCard({ artist, size = 220 }: { artist: ArtistLite; size?: number }) {
-  const src = pictureUrl(artist.picture, 750);
+  const src = pictureUrl(artist.picture, 1080);
   return (
     <Link
       href={`/artist/${artist.id}`}
@@ -262,7 +262,7 @@ export function CardGrid({
           )}
         </div>
       )}
-      <div className="stagger-fade grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="stagger-fade grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8">
         {children}
       </div>
     </section>

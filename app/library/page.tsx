@@ -32,7 +32,7 @@ export default async function LibraryPage() {
         return (
           <section key={cat.q} className="mb-10">
             <h2 className="mb-4 text-xl font-bold text-white">{cat.label}</h2>
-            <div className="stagger-fade grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="stagger-fade grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8">
               {playlists.map((pl) => {
                 const src = playlistCoverUrl(pl, 640);
                 return (
@@ -48,7 +48,7 @@ export default async function LibraryPage() {
                           src={src}
                           alt={pl.title}
                           fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, (max-width: 1536px) 16vw, 14vw"
                           className="object-cover transition duration-300 group-hover:scale-105"
                         />
                       ) : (

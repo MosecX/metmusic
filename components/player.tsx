@@ -533,9 +533,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       clearMediaSessionMetadata();
       return;
     }
-    const cover = coverUrl(currentTrack.album?.cover, 640);
+    const cover = coverUrl(currentTrack.album?.cover, 1080);
     const artwork = cover
-      ? [{ src: `/api/artwork?url=${encodeURIComponent(cover)}`, sizes: "640x640", type: "image/jpeg" }]
+      ? [{ src: `/api/artwork?url=${encodeURIComponent(cover)}`, sizes: "1080x1080", type: "image/jpeg" }]
       : [];
     setMediaSessionMetadata({
       title: currentTrack.title,
@@ -749,7 +749,7 @@ export function PlayerBar() {
   };
 
   return (
-    <div className="glass-strong slide-in-up fixed inset-x-0 bottom-0 z-40 rounded-t-2xl">
+    <div className="player-bar slide-in-up fixed inset-x-0 bottom-0 z-40 rounded-t-2xl">
       {/* Mobile layout */}
       <div className="flex flex-col gap-1.5 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 md:hidden">
         <div className="flex items-center gap-3">

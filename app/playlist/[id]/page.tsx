@@ -32,7 +32,7 @@ export default async function PlaylistPage({
         id={id}
         title={playlist.title}
         description={playlist.description}
-        cover={playlistCoverUrl(playlist, 640)}
+        cover={playlistCoverUrl(playlist, 1080)}
         duration={playlist.duration}
         total={playlist.numberOfTracks ?? items.length}
         initialItems={items}

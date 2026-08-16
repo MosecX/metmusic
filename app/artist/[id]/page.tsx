@@ -87,7 +87,7 @@ export default async function ArtistPage({
       .find((a) => a.vibrantColor)?.vibrantColor ?? "#22d3ee";
 
   const pic = artist.picture
-    ? `https://resources.tidal.com/images/${artist.picture.replace(/-/g, "/")}/750x750.jpg`
+    ? `https://resources.tidal.com/images/${artist.picture.replace(/-/g, "/")}/1080x1080.jpg`
     : (cover?.["750"] ?? null);
 
   return (

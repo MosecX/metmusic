@@ -40,7 +40,7 @@ export default async function TrackPage({
 
   const recTracks = recs.status === "fulfilled" ? recs.value : [];
   const lyricsData = lyrics.status === "fulfilled" ? lyrics.value : null;
-  const cover = coverUrl(track.album?.cover, 640);
+  const cover = coverUrl(track.album?.cover, 1080);
   const albumLink = `/album/${track.album?.id ?? ""}`;
   const artistLink = `/artist/${track.artist?.id ?? track.artists?.[0]?.id ?? ""}`;
 
